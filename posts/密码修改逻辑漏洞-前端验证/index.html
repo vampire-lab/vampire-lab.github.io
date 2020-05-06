@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>密码修改逻辑漏洞-前端验证 - Vampire blog</title><meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta itemprop="name" content="密码修改逻辑漏洞-前端验证">
+<meta itemprop="description" content="背景故事 今天上线测试发现了一个只有前端验证的修改密码逻辑漏洞，但是该应用根本没有对验证码进行验证。 访问测试地址http://xxx.xxx.xxx.xxx:xxx/dss，查看页面功能，发现存在找回密码功能。 漏洞发现 点击找回密码功能，输入内容后发现前端验证，未向后端发送数据包 从验证码入手，看看发送验证码的情况 发现点击发送没有时间限制，但是不能指定电话号码，所以不知道是否真的有短信发送 点击确定，向服务器发起获取验证码请求
+POST /dss/findPwd.e HTTP/1.1 Host: xxx.xxx.xxx.xxx:xxx User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:65.0) Gecko/20100101 Firefox/65.0 Accept: */* Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2 Accept-Encoding: gzip, deflate Referer: http://xxx.xxx.xxx.xxx:xxx/dss/findPwd.jsp Content-Type: application/x-www-form-urlencoded; charset=UTF-8 X-Requested-With: XMLHttpRequest Content-Length: 7 Connection: close Cookie: JSESSIONID=14CEE8646A9BF274394F948BE24D5ED5 id=test 放过请求找回test账号，返回200，没有数据内容 再尝试请求一个错误的账号，返回内容中疑似存在验证码，但是该验证码不能成功重置密码 上面数据包根据返回内容不同，也可用来爆破存在的用户名
+漏洞验证 既然是前端验证，我们通过使用开发者工具箱找到前端验证的函数 查看找到的函数内容
+function checkform() { $(&#34;#checkResult&#34;).html(&#39;&#39;); var checkResultMes = &#39;请输入的用户账号!&#39;; var findPwdNumber = $(&#39;#findPwdNumber&#39;).val(); if(!findPwdNumber||$.trim(findPwdNumber)==&#39;&#39;) { //验证手机号为11位 $(&#34;#checkResult&#34;).html(checkResultMes); return false; } return true; } //验证输入的手机号是否存在 function getRand(){ if(checkform()){ var findPwdNumber = $(&#39;#findPwdNumber&#39;).">
+<meta itemprop="datePublished" content="2019-11-04T18:57:48&#43;08:00" />
+<meta itemprop="dateModified" content="2019-11-04T18:57:48&#43;08:00" />
+<meta itemprop="wordCount" content="203">
+
+
+
+<meta itemprop="keywords" content="漏洞复现," /><meta property="og:title" content="密码修改逻辑漏洞-前端验证" />
+<meta property="og:description" content="背景故事 今天上线测试发现了一个只有前端验证的修改密码逻辑漏洞，但是该应用根本没有对验证码进行验证。 访问测试地址http://xxx.xxx.xxx.xxx:xxx/dss，查看页面功能，发现存在找回密码功能。 漏洞发现 点击找回密码功能，输入内容后发现前端验证，未向后端发送数据包 从验证码入手，看看发送验证码的情况 发现点击发送没有时间限制，但是不能指定电话号码，所以不知道是否真的有短信发送 点击确定，向服务器发起获取验证码请求
+POST /dss/findPwd.e HTTP/1.1 Host: xxx.xxx.xxx.xxx:xxx User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:65.0) Gecko/20100101 Firefox/65.0 Accept: */* Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2 Accept-Encoding: gzip, deflate Referer: http://xxx.xxx.xxx.xxx:xxx/dss/findPwd.jsp Content-Type: application/x-www-form-urlencoded; charset=UTF-8 X-Requested-With: XMLHttpRequest Content-Length: 7 Connection: close Cookie: JSESSIONID=14CEE8646A9BF274394F948BE24D5ED5 id=test 放过请求找回test账号，返回200，没有数据内容 再尝试请求一个错误的账号，返回内容中疑似存在验证码，但是该验证码不能成功重置密码 上面数据包根据返回内容不同，也可用来爆破存在的用户名
+漏洞验证 既然是前端验证，我们通过使用开发者工具箱找到前端验证的函数 查看找到的函数内容
+function checkform() { $(&#34;#checkResult&#34;).html(&#39;&#39;); var checkResultMes = &#39;请输入的用户账号!&#39;; var findPwdNumber = $(&#39;#findPwdNumber&#39;).val(); if(!findPwdNumber||$.trim(findPwdNumber)==&#39;&#39;) { //验证手机号为11位 $(&#34;#checkResult&#34;).html(checkResultMes); return false; } return true; } //验证输入的手机号是否存在 function getRand(){ if(checkform()){ var findPwdNumber = $(&#39;#findPwdNumber&#39;)." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://vampire-lab.github.io/posts/%E5%AF%86%E7%A0%81%E4%BF%AE%E6%94%B9%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E-%E5%89%8D%E7%AB%AF%E9%AA%8C%E8%AF%81/" />
+<meta property="article:published_time" content="2019-11-04T18:57:48+08:00" />
+<meta property="article:modified_time" content="2019-11-04T18:57:48+08:00" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="密码修改逻辑漏洞-前端验证"/>
+<meta name="twitter:description" content="背景故事 今天上线测试发现了一个只有前端验证的修改密码逻辑漏洞，但是该应用根本没有对验证码进行验证。 访问测试地址http://xxx.xxx.xxx.xxx:xxx/dss，查看页面功能，发现存在找回密码功能。 漏洞发现 点击找回密码功能，输入内容后发现前端验证，未向后端发送数据包 从验证码入手，看看发送验证码的情况 发现点击发送没有时间限制，但是不能指定电话号码，所以不知道是否真的有短信发送 点击确定，向服务器发起获取验证码请求
+POST /dss/findPwd.e HTTP/1.1 Host: xxx.xxx.xxx.xxx:xxx User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:65.0) Gecko/20100101 Firefox/65.0 Accept: */* Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2 Accept-Encoding: gzip, deflate Referer: http://xxx.xxx.xxx.xxx:xxx/dss/findPwd.jsp Content-Type: application/x-www-form-urlencoded; charset=UTF-8 X-Requested-With: XMLHttpRequest Content-Length: 7 Connection: close Cookie: JSESSIONID=14CEE8646A9BF274394F948BE24D5ED5 id=test 放过请求找回test账号，返回200，没有数据内容 再尝试请求一个错误的账号，返回内容中疑似存在验证码，但是该验证码不能成功重置密码 上面数据包根据返回内容不同，也可用来爆破存在的用户名
+漏洞验证 既然是前端验证，我们通过使用开发者工具箱找到前端验证的函数 查看找到的函数内容
+function checkform() { $(&#34;#checkResult&#34;).html(&#39;&#39;); var checkResultMes = &#39;请输入的用户账号!&#39;; var findPwdNumber = $(&#39;#findPwdNumber&#39;).val(); if(!findPwdNumber||$.trim(findPwdNumber)==&#39;&#39;) { //验证手机号为11位 $(&#34;#checkResult&#34;).html(checkResultMes); return false; } return true; } //验证输入的手机号是否存在 function getRand(){ if(checkform()){ var findPwdNumber = $(&#39;#findPwdNumber&#39;)."/>
+<link href='https://fonts.googleapis.com/css?family=Playfair+Display:700' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" type="text/css" media="screen" href="https://vampire-lab.github.io/css/normalize.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="https://vampire-lab.github.io/css/main.css" />
+
+        <link id="dark-scheme" rel="stylesheet" type="text/css" href="https://vampire-lab.github.io/css/dark.css" />
+
+	<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+		<script src="https://vampire-lab.github.io/js/main.js"></script>
+</head>
+
+<body>
+	<div class="container wrapper">
+		<div class="header">
+	
+		<div class="avatar">
+			<a href="https://vampire-lab.github.io/">
+				<img src="/images/im/t.png" alt="Vampire blog" />
+			</a>
+		</div>
+	
+	<h1 class="site-title"><a href="https://vampire-lab.github.io/">Vampire blog</a></h1>
+	<div class="site-description"><p>不去想是否能够成功,既然选择了远方,便只顾风雨兼程。</p><nav class="nav social">
+			<ul class="flat"><li><a href="https://github.com/vampire-lab" title="Github"><i data-feather="github"></i></a></li><li><a href="/index.xml" title="RSS"><i data-feather="rss"></i></a></li></ul>
+		</nav><span class="scheme-toggle"><a href="#" id="scheme-toggle"></a></div>
+
+	<nav class="nav">
+		<ul class="flat">
+			
+			<li>
+				<a href="/">Home</a>
+			</li>
+			
+			<li>
+				<a href="/posts">All posts</a>
+			</li>
+			
+			<li>
+				<a href="/about">About</a>
+			</li>
+			
+			<li>
+				<a href="/tags">Tags</a>
+			</li>
+			
+		</ul>
+	</nav>
+</div>
+
+
+		<div class="post">
+			<div class="post-header">
+				
+					<div class="meta">
+						<div class="date">
+							<span class="day">04</span>
+							<span class="rest">Nov 2019</span>
+						</div>
+					</div>
+				
+				<div class="matter">
+					<h1 class="title">密码修改逻辑漏洞-前端验证</h1>
+				</div>
+			</div>
+					
+			<div class="markdown">
+				<h3 id="背景故事">背景故事</h3>
+<p>今天上线测试发现了一个只有前端验证的修改密码逻辑漏洞，但是该应用根本没有对验证码进行验证。
+访问测试地址http://xxx.xxx.xxx.xxx:xxx/dss，查看页面功能，发现存在找回密码功能。
+<img src="/images/2019/front-end-validation/2092001-2a34b16c7187c8cd.png" alt="登陆页面"></p>
+<h3 id="漏洞发现">漏洞发现</h3>
+<p>点击找回密码功能，输入内容后发现前端验证，未向后端发送数据包
+<img src="/images/2019/front-end-validation/2092001-92e21170c477c6e2.png" alt="找回密码">
+从验证码入手，看看发送验证码的情况
+<img src="/images/2019/front-end-validation/2092001-56159a9d516bf219.png" alt="获取验证码">
+发现点击发送没有时间限制，但是不能指定电话号码，所以不知道是否真的有短信发送
+点击确定，向服务器发起获取验证码请求</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">POST /dss/findPwd.e HTTP/1.1
+Host: xxx.xxx.xxx.xxx:xxx
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:65.0) Gecko/20100101 Firefox/65.0
+Accept: */*
+Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2
+Accept-Encoding: gzip, deflate
+Referer: http://xxx.xxx.xxx.xxx:xxx/dss/findPwd.jsp
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+X-Requested-With: XMLHttpRequest
+Content-Length: 7
+Connection: close
+Cookie: JSESSIONID=14CEE8646A9BF274394F948BE24D5ED5
+id=test
+</code></pre></div><p>放过请求找回test账号，返回200，没有数据内容
+<img src="/images/2019/front-end-validation/2092001-9ba33eb5ce253b3c.png" alt="正确用户名返回数据包">
+再尝试请求一个错误的账号，返回内容中疑似存在验证码，但是该验证码不能成功重置密码
+<img src="/images/2019/front-end-validation/2092001-8f3f61a812634005.png" alt="错误用户名返回数据包">
+上面数据包根据返回内容不同，也可用来爆破存在的用户名</p>
+<h3 id="漏洞验证">漏洞验证</h3>
+<p>既然是前端验证，我们通过使用开发者工具箱找到前端验证的函数
+<img src="/images/2019/front-end-validation/2092001-07cdd9fdbf5af41f.png" alt="更新密码调用的js函数">
+查看找到的函数内容</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">            function checkform() {
+                $(&#34;#checkResult&#34;).html(&#39;&#39;);
+                var checkResultMes = &#39;请输入的用户账号!&#39;;
+                var findPwdNumber = $(&#39;#findPwdNumber&#39;).val();
+                if(!findPwdNumber||$.trim(findPwdNumber)==&#39;&#39;) {   
+                //验证手机号为11位
+                     $(&#34;#checkResult&#34;).html(checkResultMes);
+                     return false;
+                }
+                return true;
+            }
+            
+            //验证输入的手机号是否存在
+            function getRand(){
+                if(checkform()){
+                    var findPwdNumber = $(&#39;#findPwdNumber&#39;).val();
+                    if(confirm(&#39;是否确认执行找回工号[&#39; + findPwdNumber + &#39;]的密码操作?&#39;)){                        
+                        $.post(&#39;/dss/findPwd.e&#39;,{id:findPwdNumber},function(data){
+                            var result = eval(data);
+                            $(&#34;#findPwdRand_hidden&#34;).val(result[0].findPwdRand);
+                            $(&#34;#checkResult&#34;).html(result[0].Msg);
+                        });
+                    }
+                }
+            }
+            
+            //重置密码
+            function forwordcxc(){
+                var info = {};
+                info.findPwdNumber = $(&#34;#findPwdNumber&#34;).val();
+                info.findPwdRand = $(&#34;#findPwdRand&#34;).val();
+                info.findPwdRand_hidden = $(&#34;#findPwdRand_hidden&#34;).val();
+                info.findPwdNew = $(&#34;#findPwdNew&#34;).val();
+                info.findPwdNewRepeat = $(&#34;#findPwdNewRepeat&#34;).val();
+                if(info.findPwdNew==&#34;&#34;||info.findPwdNewRepeat==&#34;&#34;){
+                    $(&#34;#checkResult&#34;).html(&#39;请输入两次新密码!&#39;);
+                    return;
+                }
+                if(info.findPwdNew != info.findPwdNewRepeat){
+                    $(&#34;#checkResult&#34;).html(&#39;两次输入的密码不一致,请重新输入!&#39;);
+                    return;
+                }
+                var numExp = new RegExp(/([0-9])/);
+                var strExp = new RegExp(/([a-zA-Z])/);
+                var strnumExp = new RegExp(/([!,@,#,$,%,^,&amp;,*,?,_,~])/);
+                if(!(strnumExp.test(info.findPwdNew)&amp;&amp; strExp.test(info.findPwdNew)&amp;&amp;numExp.test(info.findPwdNew)&amp;&amp;info.findPwdNew.length&gt;=8)){
+                    $(&#34;#checkResult&#34;).html(&#39;新密码必需包括特殊字符(! @ # $ % ^ &amp; * ? _ ~), 字母, 数字且长度大于7!&#39;);
+                    return;
+                }
+                if(info.findPwdRand==&#34;&#34;){
+                    $(&#34;#checkResult&#34;).html(&#39;请输入接收到的验证码!&#39;);
+                    return;
+                }
+                if(info.findPwdRand != info.findPwdRand_hidden){
+                    $(&#34;#checkResult&#34;).html(&#39;验证码输入错误,请重新输入!&#39;);
+                    return;
+                }
+                info.findPwdNew = aesEncrypt(info.findPwdNew);
+                info.findPwdNewRepeat = aesEncrypt(info.findPwdNewRepeat);
+                $.post(&#39;/dss/updatePwd.e&#39;,info,function(data){
+                    var value = eval(data);
+                    if(value[0].result == &#39;1&#39;){
+                        $(&#34;#checkResult&#34;).html(&#34;密码更新成功,此页面3秒后关闭,请用新密码登录!&#34;);
+                        setTimeout(rollBack, 3000);
+                    }else{
+                        $(&#34;#checkResult&#34;).html(&#34;修改密码错误，请联系管理员!&#34;);
+                    }
+                });
+            }
+            
+            function rollBack(){
+                window.location.href = &#34;/dss/index.jsp&#34;;
+            }
+</code></pre></div><p>查看js代码发现验证码是否正确只通过提交字段和隐藏字段是否相等
+<img src="/images/2019/front-end-validation/2092001-49b29a2076cad17c.png" alt="验证码验证代码">
+使用开发者工具箱的控制台执行js代码
+<img src="/images/2019/front-end-validation/2092001-945a398a5f445a07.png" alt="执行js代码">
+获取id为findPwdRand和findPwdRand_hidden的值，发现findPwdRand_hidden内容为空，为findPwdRand_hidden赋值与findPwdRand相同的值，点击更新密码，然后发起修改请求
+<img src="/images/2019/front-end-validation/2092001-cec625237af57f80.png" alt="修改密码数据包">
+放过拦截的数据包
+<img src="/images/2019/front-end-validation/2092001-9e851d24a9757c31.png" alt="修改成功"></p>
+<p>密码更新成功，验证可登陆。</p>
+
+			</div>
+
+			<div class="tags">
+				
+					
+						<ul class="flat">
+							
+							<li><a href="/tags/%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0">漏洞复现</a></li>
+							
+						</ul>
+					
+				
+			</div>
+
+
+		</div>
+	</div>
+	<div class="footer wrapper">
+	<nav class="nav">
+		<div>2019  © Copyright notice |  <a href="https://github.com/knadh/hugo-ink">Ink</a> theme on <a href="https://gohugo.io">Hugo</a></div>
+	</nav>
+</div>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-123-45', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+<script>feather.replace()</script>
+</body>
+</html>

