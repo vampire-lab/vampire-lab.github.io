@@ -2,27 +2,29 @@
 <html>
 <head>
 	<meta charset="utf-8" />
-	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title> - Vampire blog</title><meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta itemprop="name" content="">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Lampiao - Vampire blog</title><meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta itemprop="name" content="Lampiao">
 <meta itemprop="description" content="靶机介绍 这个是一个类OSCP靶机，主要目的getshell、提权获得root权限、最后读取flag 靶机下载地址 https://download.vulnhub.com/lampiao/Lampiao.zip
 靶机运行 这是一个OVF格式的文件，解压zip压缩包，使用VMware或者VirtualBox打开导入即可
 信息收集 首先还是判断靶机地址，使用-sn参数判断当前网段存活主机
 root@kali:~/桌面# nmap -sn 10.10.10.* Starting Nmap 7.80 ( https://nmap.org ) at 2020-01-02 14:52 CST Nmap scan report for 10.10.10.1 Host is up (0.00025s latency). MAC Address: 00:50:56:C0:00:08 (VMware) Nmap scan report for 10.10.10.2 Host is up (0.00010s latency). MAC Address: 00:50:56:E2:1F:31 (VMware) Nmap scan report for 10.10.10.135 Host is up (0.0036s latency). MAC Address: 00:0C:29:A5:12:B3 (VMware) Nmap scan report for 10.10.10.254 Host is up (0.">
-
+<meta itemprop="datePublished" content="2020-05-08T00:42:14&#43;08:00" />
+<meta itemprop="dateModified" content="2020-05-08T00:42:14&#43;08:00" />
 <meta itemprop="wordCount" content="661">
 
 
 
-<meta itemprop="keywords" content="" /><meta property="og:title" content="" />
+<meta itemprop="keywords" content="boot2root," /><meta property="og:title" content="Lampiao" />
 <meta property="og:description" content="靶机介绍 这个是一个类OSCP靶机，主要目的getshell、提权获得root权限、最后读取flag 靶机下载地址 https://download.vulnhub.com/lampiao/Lampiao.zip
 靶机运行 这是一个OVF格式的文件，解压zip压缩包，使用VMware或者VirtualBox打开导入即可
 信息收集 首先还是判断靶机地址，使用-sn参数判断当前网段存活主机
 root@kali:~/桌面# nmap -sn 10.10.10.* Starting Nmap 7.80 ( https://nmap.org ) at 2020-01-02 14:52 CST Nmap scan report for 10.10.10.1 Host is up (0.00025s latency). MAC Address: 00:50:56:C0:00:08 (VMware) Nmap scan report for 10.10.10.2 Host is up (0.00010s latency). MAC Address: 00:50:56:E2:1F:31 (VMware) Nmap scan report for 10.10.10.135 Host is up (0.0036s latency). MAC Address: 00:0C:29:A5:12:B3 (VMware) Nmap scan report for 10.10.10.254 Host is up (0." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://vampire-lab.github.io/posts/lampiao/" />
-
+<meta property="article:published_time" content="2020-05-08T00:42:14+08:00" />
+<meta property="article:modified_time" content="2020-05-08T00:42:14+08:00" />
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content=""/>
+<meta name="twitter:title" content="Lampiao"/>
 <meta name="twitter:description" content="靶机介绍 这个是一个类OSCP靶机，主要目的getshell、提权获得root权限、最后读取flag 靶机下载地址 https://download.vulnhub.com/lampiao/Lampiao.zip
 靶机运行 这是一个OVF格式的文件，解压zip压缩包，使用VMware或者VirtualBox打开导入即可
 信息收集 首先还是判断靶机地址，使用-sn参数判断当前网段存活主机
@@ -79,8 +81,15 @@ root@kali:~/桌面# nmap -sn 10.10.10.* Starting Nmap 7.80 ( https://nmap.org ) 
 		<div class="post">
 			<div class="post-header">
 				
+					<div class="meta">
+						<div class="date">
+							<span class="day">08</span>
+							<span class="rest">May 2020</span>
+						</div>
+					</div>
+				
 				<div class="matter">
-					<h1 class="title"></h1>
+					<h1 class="title">Lampiao</h1>
 				</div>
 			</div>
 					
@@ -308,6 +317,12 @@ Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2020-01-02 15:55:
 			<div class="tags">
 				
 					
+						<ul class="flat">
+							
+							<li><a href="/tags/boot2root">boot2root</a></li>
+							
+						</ul>
+					
 				
 			</div>
 
@@ -316,7 +331,7 @@ Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2020-01-02 15:55:
 	</div>
 	<div class="footer wrapper">
 	<nav class="nav">
-		<div>1  © Copyright notice |  <a href="https://github.com/knadh/hugo-ink">Ink</a> theme on <a href="https://gohugo.io">Hugo</a></div>
+		<div>2020  © Copyright notice |  <a href="https://github.com/knadh/hugo-ink">Ink</a> theme on <a href="https://gohugo.io">Hugo</a></div>
 	</nav>
 </div>
 

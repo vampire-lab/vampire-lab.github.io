@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
     <copyright>© Copyright notice</copyright>
-    <lastBuildDate>Fri, 29 Nov 2019 12:25:32 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 08 May 2020 00:43:14 +0800</lastBuildDate>
     
 	<atom:link href="https://vampire-lab.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>boot2root</title>
+      <link>https://vampire-lab.github.io/tags/boot2root/</link>
+      <pubDate>Fri, 08 May 2020 00:43:14 +0800</pubDate>
+      
+      <guid>https://vampire-lab.github.io/tags/boot2root/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>漏洞复现</title>
@@ -18,15 +27,6 @@
       <pubDate>Fri, 29 Nov 2019 12:25:32 +0800</pubDate>
       
       <guid>https://vampire-lab.github.io/tags/%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>boot2root</title>
-      <link>https://vampire-lab.github.io/tags/boot2root/</link>
-      <pubDate>Mon, 04 Nov 2019 20:48:28 +0800</pubDate>
-      
-      <guid>https://vampire-lab.github.io/tags/boot2root/</guid>
       <description></description>
     </item>
     

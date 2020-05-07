@@ -13,6 +13,41 @@
     
     
     <item>
+      <title>Raven 1</title>
+      <link>https://vampire-lab.github.io/posts/raven_1/</link>
+      <pubDate>Fri, 08 May 2020 00:43:14 +0800</pubDate>
+      
+      <guid>https://vampire-lab.github.io/posts/raven_1/</guid>
+      <description>靶机介绍 这是一个boot2root靶机，目标为获取root权限，读取flag内容 靶机下载地址 https://download.vulnhub.com/raven/Raven.ova
+靶机运行 该靶机格式为OVA格式，可导入到VMware或者VirtualBox虚拟中运行即可。
+信息收集 查看靶机地址，通过扫描虚拟机网段，找到靶机ip为10.10.10.138
+root@kali:~# nmap -sn 10.10.10.* Starting Nmap 7.80 ( https://nmap.org ) at 2020-01-07 09:52 CST Nmap scan report for 10.10.10.1 Host is up (0.00029s latency). MAC Address: 00:50:56:C0:00:08 (VMware) Nmap scan report for 10.10.10.2 Host is up (0.00023s latency). MAC Address: 00:50:56:E2:1F:31 (VMware) Nmap scan report for 10.10.10.138 Host is up (0.00021s latency). MAC Address: 00:0C:29:67:8F:F1 (VMware) Nmap scan report for 10.10.10.254 Host is up (0.</description>
+    </item>
+    
+    <item>
+      <title>Lampiao</title>
+      <link>https://vampire-lab.github.io/posts/lampiao/</link>
+      <pubDate>Fri, 08 May 2020 00:42:14 +0800</pubDate>
+      
+      <guid>https://vampire-lab.github.io/posts/lampiao/</guid>
+      <description>靶机介绍 这个是一个类OSCP靶机，主要目的getshell、提权获得root权限、最后读取flag 靶机下载地址 https://download.vulnhub.com/lampiao/Lampiao.zip
+靶机运行 这是一个OVF格式的文件，解压zip压缩包，使用VMware或者VirtualBox打开导入即可
+信息收集 首先还是判断靶机地址，使用-sn参数判断当前网段存活主机
+root@kali:~/桌面# nmap -sn 10.10.10.* Starting Nmap 7.80 ( https://nmap.org ) at 2020-01-02 14:52 CST Nmap scan report for 10.10.10.1 Host is up (0.00025s latency). MAC Address: 00:50:56:C0:00:08 (VMware) Nmap scan report for 10.10.10.2 Host is up (0.00010s latency). MAC Address: 00:50:56:E2:1F:31 (VMware) Nmap scan report for 10.10.10.135 Host is up (0.0036s latency). MAC Address: 00:0C:29:A5:12:B3 (VMware) Nmap scan report for 10.10.10.254 Host is up (0.</description>
+    </item>
+    
+    <item>
+      <title>GoldenEye-v1</title>
+      <link>https://vampire-lab.github.io/posts/goldeneye-v1/</link>
+      <pubDate>Fri, 08 May 2020 00:41:14 +0800</pubDate>
+      
+      <guid>https://vampire-lab.github.io/posts/goldeneye-v1/</guid>
+      <description>靶机介绍 该靶机为OSCP考试类型的boot2root靶机，目标为获取root权限并读取flag 靶机下载地址 https://download.vulnhub.com/goldeneye/GoldenEye-v1.ova
+靶机运行 靶机格式为ova，将tgz文件解压，使用VMware或者VirtualBox打开导入即可，导入过程中需要指定路径 信息收集 首先判断一下靶机的存活地址，直接使用nmap -sP 探测，发现靶机地址为10.10.10.133
+root@kali:~# nmap -sP 10.10.10.* Starting Nmap 7.80 ( https://nmap.org ) at 2019-11-27 01:43 EST Nmap scan report for 10.10.10.1 Host is up (0.00038s latency). MAC Address: 00:50:56:C0:00:08 (VMware) Nmap scan report for 10.10.10.2 Host is up (0.00025s latency). MAC Address: 00:50:56:E2:1F:31 (VMware) Nmap scan report for 10.10.10.133 Host is up (0.00014s latency). MAC Address: 00:0C:29:4C:1F:FB (VMware) Nmap scan report for 10.</description>
+    </item>
+    
+    <item>
       <title>About</title>
       <link>https://vampire-lab.github.io/about/</link>
       <pubDate>Sun, 19 Apr 2020 21:37:58 +0530</pubDate>
